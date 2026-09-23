@@ -8,6 +8,7 @@ const CATEGORIES = [
   ['comida', 'Comida', 'comida'],
   ['arte', 'Arte', 'arte'],
   ['souvenirs', 'Souvenirs', 'souvenir'],
+  ['accesorios', 'Accesorios', 'accesorio'],
   ['servicios', 'Servicios', 'servicio'],
 ]
 

@@ -13,6 +13,7 @@ const PATHS: Record<string, React.ReactNode> = {
   artesania: (<><path d="M4 9h16l-2 11H6z" /><path d="M4 9c2-4 14-4 16 0" /><path d="M9 13h6M8 16.5h8" /></>),
   souvenir: (<><rect x="4" y="8" width="16" height="12" /><path d="M12 8v12M4 12h16" /><path d="M12 8c-2-4-6-3-5 0M12 8c2-4 6-3 5 0" /></>),
   servicio: (<><path d="M14.5 5.5a4 4 0 0 0 4 5.6L11 18.6a2 2 0 0 1-2.8-2.8l7.5-7.5" /><path d="M4 20l3-3" /></>),
+  accesorio: (<><path d="M4 10h16v4a8 8 0 0 1-16 0z" /><path d="M4 10c0-3.3 3.6-6 8-6s8 2.7 8 6" /><path d="M12 4v3" /></>),
   inicio: (<><path d="M3 11 12 3l9 8" /><path d="M5 9.5V21h14V9.5" /></>),
   buscar: (<><circle cx="11" cy="11" r="6.5" /><path d="m16 16 5 5" /></>),
   usuario: (<><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" /></>),

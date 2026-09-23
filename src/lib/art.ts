@@ -31,6 +31,7 @@ export const CATEGORY_COLORS: Record<string, string> = {
   comida: '#FF8A00',
   arte: '#2ECC71',
   souvenirs: '#9C4A2F',
+  accesorios: '#FF8A00',
   servicios: '#6B5BD2',
 }
 const CATEGORY_TINTS: Record<string, string> = {
@@ -39,6 +40,7 @@ const CATEGORY_TINTS: Record<string, string> = {
   comida: '#FFEBD2',
   arte: '#DDF6E7',
   souvenirs: '#F3E0D8',
+  accesorios: '#FFEBD2',
   servicios: '#E7E4F6',
 }
 
@@ -159,6 +161,9 @@ export function productArt(seed: string, categorySlug?: string | null) {
         const c = [main, acc, acc2, '#1F1D1B', '#F7F3EE'][k]
         m += `<circle cx="${cx}" cy="${cy}" r="${rr}" fill="${c}" opacity=".9"/><rect x="${cx - 6}" y="${cy + rr * 0.6}" width="12" height="${40 + r() * 80}" rx="6" fill="${c}"/>`
       }
+      break
+    case 'accesorios':
+      m = `<circle cx="200" cy="170" r="130" fill="${acc}" opacity=".35"/><path d="M90 250 Q200 120 310 250 Z" fill="${main}"/><rect x="70" y="245" width="260" height="34" rx="17" fill="${main}"/><rect x="90" y="228" width="220" height="12" fill="${acc2}"/><circle cx="200" cy="360" r="46" fill="none" stroke="#1F1D1B" stroke-width="12"/><circle cx="200" cy="316" r="12" fill="${acc}"/>`
       break
     case 'souvenirs': {
       let d = 'M20 440'

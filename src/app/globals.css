@@ -449,3 +449,4 @@ a.lrow:hover { transform: translateX(3px); }
 
 .prod__img a > img, .prod__img a > .svg-fill > svg { width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--ease); }
 .prod:hover .prod__img a > img { transform: scale(1.06); }
+.cat[data-k="6"] { --c: #FFF4D6; --ink: #7A5A00 }

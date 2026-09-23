@@ -85,11 +85,27 @@ El repo ya trae `railway.json`: Railway construye con `npm run build`, corre las
 
 Para un dominio propio: **Settings → Networking → Custom Domain** y actualizá `APP_URL`.
 
+## Tiendas de prueba
+
+Para verificar la plataforma de punta a punta hay 3 tiendas de prueba, ya aprobadas, con 4 productos y 6 pedidos cada una (en distintos estados):
+
+| Tienda | Categoría | Usuario |
+| --- | --- | --- |
+| Ladera Streetwear | Ropa y streetwear | `moda@demo.florece13.test` |
+| Tejidos Doña Amparo | Accesorios | `accesorios@demo.florece13.test` |
+| Recuerdos del Salado | Souvenirs | `recuerdos@demo.florece13.test` |
+
+Clave de las tres: `Florece13-prueba` (o la que pongas en `SEED_DEMO_PASSWORD`).
+
+- **Crearlas:** variable `SEED_DEMO=true` y redesplegar (o `SEED_DEMO=true npm run db:demo`).
+- **Borrarlas antes del lanzamiento:** `SEED_DEMO=remove` y redesplegar. Borra las cuentas `@demo.florece13.test` con sus tiendas, productos y pedidos.
+- Sin `SEED_DEMO` el script no hace nada.
+
 ## Producción en otro hosting
 
 ```bash
 npm run build
-npm run release   # migraciones + categorías
+npm run release   # migraciones + categorías (+ tiendas de prueba si SEED_DEMO=true)
 npm start
 ```
 
