@@ -40,33 +40,33 @@ export function ProductForm({
   return (
     <>
       <form onSubmit={onSubmit} className="form" noValidate>
-        <div className="card card-pad form">
+        <div className="card pad form">
           <div className="field">
-            <span className="field-label">Fotos</span>
+            <span className="flabel">Fotos</span>
             <ImageUploader name="images" initial={defaults.images} />
-            {err('images') && <span className="field-error">{err('images')}</span>}
+            {err('images') && <span className="ferr">{err('images')}</span>}
           </div>
           <div className="field">
             <label htmlFor="name">Nombre</label>
             <input id="name" name="name" className="input" maxLength={100} required defaultValue={defaults.name} placeholder="Mochila wayuu tejida a mano" aria-invalid={Boolean(err('name'))} />
-            {err('name') && <span className="field-error">{err('name')}</span>}
+            {err('name') && <span className="ferr">{err('name')}</span>}
           </div>
           <div className="row" style={{ alignItems: 'flex-start' }}>
             <div className="field" style={{ flex: '1 1 160px' }}>
               <label htmlFor="price">Precio</label>
-              <div className="input-prefix">
+              <div className="prefix">
                 <span>$</span>
                 <input id="price" name="price" className="input tnum" inputMode="numeric" required defaultValue={fmt(defaults.price)} onInput={onMoney} aria-invalid={Boolean(err('price'))} />
               </div>
-              {err('price') && <span className="field-error">{err('price')}</span>}
+              {err('price') && <span className="ferr">{err('price')}</span>}
             </div>
             <div className="field" style={{ flex: '1 1 160px' }}>
               <label htmlFor="compareAtPrice">Precio antes <span className="muted" style={{ fontWeight: 500 }}>(opcional)</span></label>
-              <div className="input-prefix">
+              <div className="prefix">
                 <span>$</span>
                 <input id="compareAtPrice" name="compareAtPrice" className="input tnum" inputMode="numeric" defaultValue={fmt(defaults.compareAtPrice)} onInput={onMoney} />
               </div>
-              <span className="field-hint">Si está en oferta, aparece tachado.</span>
+              <span className="hint">Si está en oferta, aparece tachado.</span>
             </div>
           </div>
           <div className="field">
@@ -75,19 +75,19 @@ export function ProductForm({
               <option value="" disabled>Elegí una categoría</option>
               {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
-            {err('categoryId') && <span className="field-error">{err('categoryId')}</span>}
+            {err('categoryId') && <span className="ferr">{err('categoryId')}</span>}
           </div>
           <div className="field">
             <label htmlFor="description">Descripción</label>
             <textarea id="description" name="description" className="textarea" maxLength={3000} defaultValue={defaults.description} placeholder="Material, medidas, tallas, cuánto se demora en hacerse, quién lo hace…" />
-            {err('description') && <span className="field-error">{err('description')}</span>}
+            {err('description') && <span className="ferr">{err('description')}</span>}
           </div>
           <label className="check">
             <input type="checkbox" name="isAvailable" defaultChecked={defaults.isAvailable ?? true} />
             <span><strong>Disponible</strong><br /><span className="small muted">Desmarcalo si se te agotó; el producto sigue visible como agotado.</span></span>
           </label>
         </div>
-        {state?.message && <div className={`alert ${state.ok ? 'alert-ok' : 'alert-error'}`} role="status">{state.message}</div>}
+        {state?.message && <div className={`note ${state.ok ? "note-ok" : "note-err"}`} role="status">{state.message}</div>}
         <button type="submit" className="btn btn-primary btn-lg" disabled={pending} style={{ alignSelf: 'flex-start' }}>
           {pending ? 'Guardando…' : productId ? 'Guardar cambios' : 'Publicar producto'}
         </button>

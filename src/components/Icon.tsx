@@ -16,7 +16,7 @@ const PATHS: Record<string, React.ReactNode> = {
   inicio: (<><path d="M3 11 12 3l9 8" /><path d="M5 9.5V21h14V9.5" /></>),
   buscar: (<><circle cx="11" cy="11" r="6.5" /><path d="m16 16 5 5" /></>),
   usuario: (<><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" /></>),
-  mas: (<path d="M12 4v16M4 12h16" />),
+  mas: (<path d="M12 5v14M5 12h14" />),
   menos: (<path d="M4 12h16" />),
   cerrar: (<path d="M5 5l14 14M19 5 5 19" />),
   basura: (<><path d="M4 7h16" /><path d="M9 7V4h6v3" /><path d="M6 7l1 13h10l1-13" /></>),
@@ -32,6 +32,8 @@ const PATHS: Record<string, React.ReactNode> = {
   envio: (<><path d="M3 6h11v10H3z" /><path d="M14 10h4l3 3v3h-7" /><circle cx="7" cy="18" r="2" /><circle cx="17" cy="18" r="2" /></>),
   salir: (<><path d="M14 4h6v16h-6" /><path d="M10 8l-4 4 4 4M6 12h10" /></>),
   escudo: (<><path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z" /><path d="m9 12 2 2 4-4" /></>),
+  corazon: (<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" />),
+  chispa: (<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18" />),
   compartir: (<><circle cx="6" cy="12" r="2.5" /><circle cx="18" cy="6" r="2.5" /><circle cx="18" cy="18" r="2.5" /><path d="m8.2 10.8 7.6-3.6M8.2 13.2l7.6 3.6" /></>),
 }
 
@@ -46,7 +48,8 @@ export function Icon({ name, size = 22, ...rest }: { name: string; size?: number
       fill="none"
       stroke="currentColor"
       strokeWidth={2}
-      strokeLinecap="square"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       aria-hidden="true"
       {...rest}
     >

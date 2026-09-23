@@ -13,18 +13,19 @@ const LINKS = [
   { href: '/panel/qr', label: 'QR y sticker', icon: 'qr' },
 ]
 
-export function PanelNav({ storeSlug }: { storeSlug: string }) {
+export function PanelNav({ storeSlug, newOrders }: { storeSlug: string; newOrders: number }) {
   const path = usePathname()
   return (
-    <nav className="panel-nav" aria-label="Panel de la tienda">
+    <nav className="pnav" aria-label="Panel de la tienda">
       {LINKS.map((l) => (
         <Link key={l.href} href={l.href} aria-current={(l.exact ? path === l.href : path.startsWith(l.href)) ? 'page' : undefined}>
           <Icon name={l.icon} size={20} /> {l.label}
+          {l.href === '/panel/pedidos' && newOrders > 0 && <span className="chip st-NUEVO" style={{ padding: '2px 8px' }}>{newOrders}</span>}
         </Link>
       ))}
       <Link href={`/t/${storeSlug}`}><Icon name="ojo" size={20} /> Ver mi tienda</Link>
       <form action={logout} style={{ display: 'contents' }}>
-        <button type="submit" className="btn btn-ghost" style={{ justifyContent: 'flex-start', fontWeight: 600, color: 'var(--texto-2)', flexShrink: 0 }}>
+        <button type="submit" className="btn btn-ghost" style={{ justifyContent: 'flex-start', fontWeight: 600, color: 'var(--tinta-2)', flexShrink: 0 }}>
           <Icon name="salir" size={20} /> Salir
         </button>
       </form>

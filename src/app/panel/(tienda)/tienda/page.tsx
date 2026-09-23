@@ -11,7 +11,7 @@ export default async function TiendaSettingsPage() {
   const categories = await getCategories()
   return (
     <div>
-      <div className="panel-head"><h1 className="title">Mi tienda</h1></div>
+      <div className="phead"><h1 className="h1">Mi tienda</h1></div>
       <StoreSettingsForm store={store} categories={categories.map((c) => ({ id: c.id, name: c.name }))} sectores={SECTORES} />
     </div>
   )

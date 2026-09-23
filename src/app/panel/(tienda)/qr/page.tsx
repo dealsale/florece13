@@ -14,12 +14,12 @@ export default async function QrPage() {
 
   return (
     <div className="stack" style={{ ['--gap' as string]: '20px' }}>
-      <div className="panel-head" style={{ marginBottom: 0 }}>
-        <h1 className="title">QR y sticker</h1>
+      <div className="phead" style={{ marginBottom: 0 }}>
+        <h1 className="h1">QR y sticker</h1>
       </div>
       <p className="lede">Pegalo en tu local, en tus bolsas o en tu tarjeta. Quien lo escanee llega directo a tu tienda.</p>
 
-      <div className="qr-box printable">
+      <div className="qr printable">
         <div className="row" style={{ justifyContent: 'center', ['--gap' as string]: '8px' }}>
           <LogoMark size={36} />
           <span style={{ fontFamily: 'var(--font-display)', fontSize: 26 }}>Florece aquí</span>

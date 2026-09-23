@@ -3,13 +3,13 @@ import { Logo } from './Logo'
 
 export function Footer() {
   return (
-    <footer className="site-footer">
-      <div className="container stack" style={{ ['--gap' as string]: '32px' }}>
+    <footer className="foot">
+      <div className="wrap stack" style={{ ['--gap' as string]: '28px' }}>
         <div className="stack" style={{ ['--gap' as string]: '10px' }}>
-          <Logo height={30} tone="light" />
+          <Logo height={34} tone="light" />
           <p style={{ maxWidth: '44ch' }}>La Comuna 13, en línea. Del barrio, para todo el país.</p>
         </div>
-        <div className="site-footer__grid">
+        <div className="foot__g">
           <div>
             <h2>Comprá</h2>
             <ul>

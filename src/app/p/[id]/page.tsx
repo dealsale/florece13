@@ -8,6 +8,7 @@ import { Icon } from '@/components/Icon'
 import { Price } from '@/components/Price'
 import { ProductCard } from '@/components/ProductCard'
 import { ShareButton } from '@/components/ShareButton'
+import { productArt } from '@/lib/art'
 import { getCurrentUser } from '@/lib/auth'
 import { getProduct, listProducts } from '@/lib/queries'
 import { appUrl } from '@/lib/url'
@@ -34,52 +35,52 @@ export default async function ProductPage({ params }: { params: Params }) {
   if (store.status !== 'ACTIVE' && !isOwner && user?.role !== 'ADMIN') notFound()
 
   const url = appUrl(`/p/${product.id}`)
-  const more = (await listProducts({ storeId: store.id, limit: 9 })).filter((p) => p.id !== product.id).slice(0, 8)
   const wa = waLink(store.whatsapp, productMessage(product.name, product.price, url))
+  const more = (await listProducts({ storeId: store.id, limit: 5 })).filter((p) => p.id !== product.id).slice(0, 4)
 
   return (
-    <div className="container">
-      <nav className="small" style={{ paddingTop: 16 }} aria-label="Ruta">
-        <Link href={`/t/${store.slug}`} style={{ fontWeight: 700 }}>
-          <Icon name="atras" size={16} style={{ verticalAlign: '-3px' }} /> {store.name}
-        </Link>
-      </nav>
+    <div className="wrap">
+      <div style={{ paddingTop: 16 }}>
+        <Link href={`/t/${store.slug}`} className="more"><Icon name="atras" size={16} /> {store.name}</Link>
+      </div>
 
-      <div className="product-layout">
-        <Gallery images={product.images.map((i) => i.url)} alt={product.name} />
+      <div className="p-layout">
+        <div className="rise">
+          <Gallery images={product.images.map((i) => i.url)} alt={product.name} fallbackSvg={productArt(product.id, product.category?.slug)} />
+        </div>
 
-        <div className="product-info">
-          {product.category && <span className="label-muted">{product.category.name}</span>}
-          <h1 className="title">{product.name}</h1>
+        <div className="p-info rise" style={{ ['--i' as string]: 1 }}>
+          {product.category && <span className="eyebrow">{product.category.name}</span>}
+          <h1 className="h1">{product.name}</h1>
           <Price value={product.price} compareAt={product.compareAtPrice} />
-          {!product.isAvailable && <div className="alert alert-info">Por ahora está agotado. Escribile a la tienda para saber cuándo vuelve.</div>}
-
-          {product.isAvailable && (
+          {product.isAvailable ? (
             <div className="stack" style={{ ['--gap' as string]: '10px' }}>
-              <AddToCart productId={product.id} storeId={store.id} />
-              <a className="btn btn-whatsapp btn-block btn-lg" href={wa} target="_blank" rel="noopener noreferrer">
+              <AddToCart productId={product.id} storeId={store.id} name={product.name} />
+              <a className="btn btn-wa btn-lg btn-block" href={wa} target="_blank" rel="noopener noreferrer">
                 <Icon name="whatsapp" size={20} /> Pedir por WhatsApp
               </a>
             </div>
+          ) : (
+            <div className="note note-info">Por ahora está agotado. Escribile a la tienda para saber cuándo vuelve.</div>
           )}
 
-          <ul className="small" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 8, color: 'var(--texto-2)' }}>
-            {store.shipsNationwide && <li className="row" style={{ ['--gap' as string]: '8px' }}><Icon name="envio" size={18} /> Envíos a todo el país, coordinados con la tienda</li>}
-            {store.allowsPickup && <li className="row" style={{ ['--gap' as string]: '8px' }}><Icon name="ubicacion" size={18} /> Recogida en la tienda{store.sector ? `, ${store.sector}` : ''}</li>}
-            <li className="row" style={{ ['--gap' as string]: '8px' }}><Icon name="escudo" size={18} /> Pagás directo a la tienda cuando confirme tu pedido</li>
+          <ul className="perks">
+            {store.shipsNationwide && <li><i style={{ background: 'var(--tint-turquesa)', color: 'var(--turquesa-t)' }}><Icon name="envio" size={18} /></i>Envíos a todo el país, coordinados con la tienda</li>}
+            {store.allowsPickup && <li><i style={{ background: 'var(--tint-naranja)', color: 'var(--naranja-t)' }}><Icon name="ubicacion" size={18} /></i>Recogida en la tienda{store.sector ? `, ${store.sector}` : ''}</li>}
+            <li><i style={{ background: 'var(--tint-verde)', color: 'var(--verde)' }}><Icon name="escudo" size={18} /></i>Pagás directo a la tienda cuando confirme tu pedido</li>
           </ul>
 
           {product.description && (
-            <div>
-              <h2 className="label" style={{ marginBottom: 8 }}>Descripción</h2>
-              <p className="product-desc">{product.description}</p>
+            <div className="stack" style={{ ['--gap' as string]: '8px' }}>
+              <span className="eyebrow">Descripción</span>
+              <p className="desc">{product.description}</p>
             </div>
           )}
 
-          <Link href={`/t/${store.slug}`} className="card store-mini">
-            <Avatar name={store.name} src={store.logoUrl} size={48} />
+          <Link href={`/t/${store.slug}`} className="mini-store">
+            <Avatar name={store.name} src={store.logoUrl} size={50} categorySlug={product.category?.slug} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 700 }}>{store.name}</div>
+              <div style={{ fontWeight: 800 }}>{store.name}</div>
               <div className="small muted">{store.sector ? `${store.sector}, Comuna 13` : 'Comuna 13, Medellín'}</div>
             </div>
             <Icon name="flecha" />
@@ -87,24 +88,22 @@ export default async function ProductPage({ params }: { params: Params }) {
 
           <div className="row">
             <ShareButton url={url} title={product.name} />
-            {isOwner && <Link href={`/panel/productos/${product.id}`} className="btn btn-ghost"><Icon name="editar" size={18} /> Editar</Link>}
+            {isOwner && <Link href={`/panel/productos/${product.id}`} className="btn btn-ghost"><Icon name="editar" size={18} /> Editar producto</Link>}
           </div>
         </div>
       </div>
 
       {more.length > 0 && (
-        <section className="section">
-          <h2 className="title-sm" style={{ marginBottom: 16 }}>Más de {store.name}</h2>
-          <div className="product-grid">{more.map((p) => <ProductCard key={p.id} product={p} showStore={false} />)}</div>
+        <section className="sec">
+          <div className="sec__head"><div><span className="tag">de la misma tienda</span><h2 className="h2">Más de {store.name}</h2></div></div>
+          <div className="grid-prods">{more.map((p, i) => <ProductCard key={p.id} product={p} showStore={false} i={i} />)}</div>
         </section>
       )}
 
       {product.isAvailable && (
-        <div className="buy-bar">
-          <a className="btn btn-whatsapp" href={wa} target="_blank" rel="noopener noreferrer">
-            <Icon name="whatsapp" size={20} /> WhatsApp
-          </a>
-          <AddToCart productId={product.id} storeId={store.id} compact />
+        <div className="buybar">
+          <a className="btn btn-wa" href={wa} target="_blank" rel="noopener noreferrer"><Icon name="whatsapp" size={20} /> WhatsApp</a>
+          <AddToCart productId={product.id} storeId={store.id} name={product.name} compact />
         </div>
       )}
     </div>

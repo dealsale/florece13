@@ -49,42 +49,48 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const n = (s: string) => counts.find((c) => c.status === s)?.n ?? 0
 
   return (
-    <div className="container" style={{ paddingTop: 28 }}>
-      <div className="panel-head">
+    <div className="wrap" style={{ paddingTop: 28 }}>
+      <div className="phead">
         <div>
-          <p className="label-muted">Florece 13</p>
-          <h1 className="title">Administración</h1>
+          <span className="tag" style={{ color: 'var(--fucsia-t)', fontSize: 20 }}>florece 13</span>
+          <h1 className="h1">Administración</h1>
         </div>
         <form action={logout}><button className="btn btn-ghost">Salir</button></form>
       </div>
 
-      <div className="stats" style={{ marginBottom: 24 }}>
-        <div className="stat"><div className="stat__value">{n('PENDING')}</div><div className="stat__label">Por aprobar</div></div>
-        <div className="stat"><div className="stat__value">{n('ACTIVE')}</div><div className="stat__label">Tiendas publicadas</div></div>
-        <div className="stat"><div className="stat__value">{totals.orders}</div><div className="stat__label">Pedidos totales</div></div>
+      <div className="kpis" style={{ marginBottom: 22 }}>
+        {[
+          [n('PENDING'), 'Por aprobar', 'var(--tint-naranja)', 'var(--naranja)'],
+          [n('ACTIVE'), 'Publicadas', 'var(--tint-verde)', 'var(--verde)'],
+          [n('SUSPENDED'), 'Suspendidas', 'var(--tint-fucsia)', 'var(--fucsia)'],
+          [totals.orders, 'Pedidos totales', 'var(--tint-turquesa)', 'var(--turquesa)'],
+        ].map(([v, l, c, ink], i) => (
+          <div key={String(l)} className="kpi rise" style={{ ['--i' as string]: i, ['--c' as string]: c, ['--ink' as string]: ink }}><b>{v}</b><span>{l}</span></div>
+        ))}
       </div>
 
-      <div className="cat-scroller" style={{ marginBottom: 16 }}>
+
+      <div className="pills" style={{ marginBottom: 16 }}>
         {TABS.map((t) => (
-          <Link key={t.key} href={`/admin?estado=${t.key}`} className="cat-pill" aria-current={status === t.key ? 'true' : undefined}>
+          <Link key={t.key} href={`/admin?estado=${t.key}`} className="pill" aria-current={status === t.key ? 'true' : undefined}>
             {t.label} ({n(t.key)})
           </Link>
         ))}
       </div>
 
       {rows.length === 0 ? (
-        <EmptyState icon="tienda" title="No hay tiendas aquí." />
+        <EmptyState title="No hay tiendas aquí." />
       ) : (
         <div className="list">
           {rows.map((s) => (
-            <div key={s.id} className="list-row" style={{ flexWrap: 'wrap' }}>
+            <div key={s.id} className="lrow" style={{ flexWrap: 'wrap' }}>
               <Avatar name={s.name} src={s.logoUrl} size={48} />
-              <div className="list-row__main" style={{ minWidth: 200 }}>
-                <Link href={`/t/${s.slug}`} className="list-row__title" style={{ color: 'var(--cemento)', display: 'block' }}>{s.name}</Link>
-                <div className="list-row__sub">
+              <div className="lrow__m" style={{ minWidth: 200 }}>
+                <Link href={`/t/${s.slug}`} className="lrow__t" style={{ color: 'var(--cemento)', display: 'block' }}>{s.name}</Link>
+                <div className="lrow__s">
                   {s.ownerName} · {s.ownerEmail} · {displayPhone(s.whatsapp)}
                 </div>
-                <div className="list-row__sub">
+                <div className="lrow__s">
                   {[s.category, s.sector, `${s.productCount} productos`, `desde ${formatDate(s.createdAt)}`].filter(Boolean).join(' · ')}
                 </div>
               </div>

@@ -31,12 +31,12 @@ export function StoreBasicsFields({
       <div className="field">
         <label htmlFor="name">Nombre de la tienda</label>
         <input id="name" name="name" className="input" maxLength={60} required defaultValue={defaults.name} aria-invalid={Boolean(err('name'))} />
-        {err('name') && <span className="field-error">{err('name')}</span>}
+        {err('name') && <span className="ferr">{err('name')}</span>}
       </div>
       <div className="field">
         <label htmlFor="tagline">Frase corta <span className="muted" style={{ fontWeight: 500 }}>(opcional)</span></label>
         <input id="tagline" name="tagline" className="input" maxLength={120} defaultValue={defaults.tagline} placeholder="Mochilas tejidas a mano en la parte alta de la 13" />
-        {err('tagline') && <span className="field-error">{err('tagline')}</span>}
+        {err('tagline') && <span className="ferr">{err('tagline')}</span>}
       </div>
       <div className="field">
         <label htmlFor="categoryId">¿Qué vendés?</label>
@@ -44,16 +44,16 @@ export function StoreBasicsFields({
           <option value="" disabled>Elegí una categoría</option>
           {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-        {err('categoryId') && <span className="field-error">{err('categoryId')}</span>}
+        {err('categoryId') && <span className="ferr">{err('categoryId')}</span>}
       </div>
       <div className="field">
         <label htmlFor="whatsapp">WhatsApp de la tienda</label>
-        <div className="input-prefix">
+        <div className="prefix">
           <span>+57</span>
           <input id="whatsapp" name="whatsapp" className="input" inputMode="tel" required placeholder="300 123 4567" defaultValue={localPhone(defaults.whatsapp)} aria-invalid={Boolean(err('whatsapp'))} />
         </div>
-        <span className="field-hint">Aquí te llegan los pedidos.</span>
-        {err('whatsapp') && <span className="field-error">{err('whatsapp')}</span>}
+        <span className="hint">Aquí te llegan los pedidos.</span>
+        {err('whatsapp') && <span className="ferr">{err('whatsapp')}</span>}
       </div>
       <div className="field">
         <label htmlFor="sector">Sector de la Comuna 13</label>
@@ -64,11 +64,11 @@ export function StoreBasicsFields({
       </div>
       <div className="field">
         <label htmlFor="instagram">Instagram <span className="muted" style={{ fontWeight: 500 }}>(opcional)</span></label>
-        <div className="input-prefix">
+        <div className="prefix">
           <span>@</span>
           <input id="instagram" name="instagram" className="input" defaultValue={defaults.instagram} autoCapitalize="none" aria-invalid={Boolean(err('instagram'))} />
         </div>
-        {err('instagram') && <span className="field-error">{err('instagram')}</span>}
+        {err('instagram') && <span className="ferr">{err('instagram')}</span>}
       </div>
     </>
   )

@@ -5,9 +5,10 @@ export const metadata: Metadata = { title: 'Carrito' }
 
 export default function CarritoPage() {
   return (
-    <div className="container">
-      <section className="section" style={{ paddingTop: 28 }}>
-        <h1 className="title" style={{ marginBottom: 20 }}>Tu carrito</h1>
+    <div className="wrap" style={{ maxWidth: 820 }}>
+      <section className="stack" style={{ paddingTop: 28 }}>
+        <span className="tag" style={{ color: 'var(--fucsia-t)', fontSize: 20 }}>casi listo</span>
+        <h1 className="h1" style={{ marginBottom: 8 }}>Tu carrito</h1>
         <CartView />
       </section>
     </div>

@@ -10,9 +10,7 @@ export const metadata: Metadata = { title: 'Explorar productos' }
 
 const PAGE_SIZE = 24
 
-type Search = Promise<{ q?: string; cat?: string; pagina?: string }>
-
-export default async function BuscarPage({ searchParams }: { searchParams: Search }) {
+export default async function BuscarPage({ searchParams }: { searchParams: Promise<{ q?: string; cat?: string; pagina?: string }> }) {
   const sp = await searchParams
   const q = (sp.q ?? '').trim().slice(0, 80)
   const cat = sp.cat ?? ''
@@ -35,47 +33,49 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
   }
 
   return (
-    <div className="container">
-      <section className="section" style={{ paddingTop: 24 }}>
-        <form action="/buscar" className="hero__search" role="search" style={{ marginTop: 0, maxWidth: 'none' }}>
-          <label htmlFor="q" className="visually-hidden">Buscar</label>
+    <div className="wrap">
+      <section className="stack" style={{ paddingTop: 24 }}>
+        <form action="/buscar" className="search" role="search" style={{ maxWidth: 'none', boxShadow: 'var(--sh-1)' }}>
+          <Icon name="buscar" size={20} />
           {cat && <input type="hidden" name="cat" value={cat} />}
-          <input id="q" name="q" defaultValue={q} className="input" placeholder="¿Qué estás buscando?" autoComplete="off" />
-          <button className="btn btn-dark" type="submit" aria-label="Buscar"><Icon name="buscar" /></button>
+          <label htmlFor="q" className="vh">Buscar</label>
+          <input id="q" name="q" defaultValue={q} placeholder="¿Qué estás buscando?" autoComplete="off" style={{ marginLeft: 10 }} />
+          <button className="btn btn-primary" type="submit">Buscar</button>
         </form>
-        <div className="cat-scroller" style={{ marginTop: 14 }}>
-          <Link href={href({ cat: '', pagina: '' })} className="cat-pill" aria-current={!cat ? 'true' : undefined}>Todo</Link>
+        <div className="pills">
+          <Link href={href({ cat: '', pagina: '' })} className="pill" aria-current={!cat ? 'true' : undefined}>Todo</Link>
           {categories.map((c) => (
-            <Link key={c.id} href={href({ cat: c.slug, pagina: '' })} className="cat-pill" aria-current={cat === c.slug ? 'true' : undefined}>
-              <Icon name={c.icon} size={20} /> {c.name}
+            <Link key={c.id} href={href({ cat: c.slug, pagina: '' })} className="pill" aria-current={cat === c.slug ? 'true' : undefined}>
+              <Icon name={c.icon} size={18} /> {c.name}
             </Link>
           ))}
         </div>
       </section>
 
       {stores.length > 0 && (
-        <section className="section" style={{ paddingTop: 28 }}>
-          <h2 className="title-sm" style={{ marginBottom: 14 }}>Tiendas</h2>
-          <div className="store-grid">{stores.map((s) => <StoreCard key={s.id} store={s} />)}</div>
+        <section className="sec" style={{ paddingTop: 28 }}>
+          <h2 className="h3" style={{ marginBottom: 14 }}>Tiendas</h2>
+          <div className="rail">{stores.map((s, i) => <StoreCard key={s.id} store={s} i={i} />)}</div>
         </section>
       )}
 
-      <section className="section" style={{ paddingTop: 28 }}>
-        <h1 className="title-sm" style={{ marginBottom: 14 }}>
-          {q ? <>Resultados para “{q}”</> : category ? category.name : 'Todos los productos'}
-        </h1>
+      <section className="sec" style={{ paddingTop: 24 }}>
+        <div className="sec__head">
+          <h1 className="h2">{q ? `“${q}”` : category ? category.name : 'Todo lo de la 13'}</h1>
+          <span className="muted small">{shown.length}{hasMore ? '+' : ''} {shown.length === 1 ? 'producto' : 'productos'}</span>
+        </div>
         {shown.length > 0 ? (
           <>
-            <div className="product-grid">{shown.map((p) => <ProductCard key={p.id} product={p} />)}</div>
+            <div className="grid-prods">{shown.map((p, i) => <ProductCard key={p.id} product={p} i={i % PAGE_SIZE} />)}</div>
             {hasMore && (
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: 28 }}>
-                <Link href={href({ pagina: String(page + 1) })} className="btn btn-outline" scroll={false}>Ver más productos</Link>
+                <Link href={href({ pagina: String(page + 1) })} className="btn btn-light" scroll={false}>Ver más productos</Link>
               </div>
             )}
           </>
         ) : (
           <EmptyState
-            icon="buscar"
+            motif="escalera"
             title={q ? 'No encontramos eso todavía.' : 'Aquí van a florecer los productos de la 13.'}
             text={q ? 'Probá con otra palabra o mirá todas las categorías.' : 'Las tiendas del barrio están subiendo sus productos. Volvé pronto.'}
           >

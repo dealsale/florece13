@@ -8,7 +8,8 @@ import sharp from 'sharp'
 export const MAX_UPLOAD_BYTES = 12 * 1024 * 1024
 const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'image/avif']
 
-export const LOCAL_UPLOAD_DIR = path.join(process.cwd(), 'uploads')
+/** Carpeta de fotos con STORAGE_DRIVER=local. En Railway apunta al volumen persistente (UPLOAD_DIR=/data/uploads). */
+export const LOCAL_UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads'))
 
 export type UploadKind = 'producto' | 'logo' | 'portada'
 

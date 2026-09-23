@@ -9,20 +9,20 @@ export function TabBar({ loggedIn }: { loggedIn: boolean }) {
   const path = usePathname()
   const tabs = [
     { href: '/', label: 'Inicio', icon: 'inicio', active: path === '/' },
-    { href: '/buscar', label: 'Explorar', icon: 'buscar', active: path.startsWith('/buscar') || path.startsWith('/tiendas') },
+    { href: '/buscar', label: 'Explorar', icon: 'buscar', active: ['/buscar', '/tiendas', '/t/', '/p/'].some((p) => path.startsWith(p)) },
     { href: '/carrito', label: 'Carrito', icon: 'carrito', active: path.startsWith('/carrito') || path.startsWith('/pedido') },
     {
       href: loggedIn ? '/panel' : '/vende',
       label: loggedIn ? 'Mi tienda' : 'Vender',
       icon: 'tienda',
-      active: path.startsWith('/panel') || path.startsWith('/vende') || path.startsWith('/admin'),
+      active: ['/panel', '/vende', '/admin', '/entrar', '/registro'].some((p) => path.startsWith(p)),
     },
   ]
   return (
-    <nav className="tabbar" aria-label="Navegación">
+    <nav className="tabs" aria-label="Navegación">
       {tabs.map((t) => (
         <Link key={t.href} href={t.href} aria-current={t.active ? 'page' : undefined}>
-          <Icon name={t.icon} size={24} />
+          <Icon name={t.icon} size={22} />
           {t.label}
           {t.icon === 'carrito' && <CartCount />}
         </Link>

@@ -12,7 +12,7 @@ export default async function NuevoProductoPage() {
   return (
     <div>
       <Link href="/panel/productos" className="small" style={{ fontWeight: 700 }}>← Productos</Link>
-      <h1 className="title" style={{ margin: '8px 0 20px' }}>Nuevo producto</h1>
+      <h1 className="h1" style={{ margin: '8px 0 20px' }}>Nuevo producto</h1>
       <ProductForm
         categories={categories.map((c) => ({ id: c.id, name: c.name }))}
         defaults={{ categoryId: store.categoryId, isAvailable: true, images: [] }}

@@ -27,11 +27,11 @@ export default async function ProductosPage({ searchParams }: { searchParams: Pr
 
   return (
     <div>
-      <div className="panel-head">
-        <h1 className="title">Productos</h1>
+      <div className="phead">
+        <h1 className="h1">Productos</h1>
         <Link href="/panel/productos/nuevo" className="btn btn-primary"><Icon name="mas" size={18} /> Nuevo</Link>
       </div>
-      {creado && <div className="alert alert-ok" style={{ marginBottom: 16 }}>¡Producto publicado!</div>}
+      {creado && <div className="note note-ok" style={{ marginBottom: 16 }}>¡Producto publicado!</div>}
       {rows.length === 0 ? (
         <EmptyState title="Aquí florecerán tus productos." text="Publicá el primero: una buena foto, el precio y cuéntale al comprador qué lo hace especial.">
           <Link href="/panel/productos/nuevo" className="btn btn-primary">Publicar el primero</Link>
@@ -39,19 +39,17 @@ export default async function ProductosPage({ searchParams }: { searchParams: Pr
       ) : (
         <div className="list">
           {rows.map((p) => (
-            <div key={p.id} className="list-row">
-              <Link href={`/panel/productos/${p.id}`} className="list-row__thumb">
+            <div key={p.id} className="lrow">
+              <Link href={`/panel/productos/${p.id}`} className="lrow__th">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 {p.imageUrl ? <img src={p.imageUrl} alt="" /> : <div className="no-photo"><Icon name="camara" /></div>}
               </Link>
-              <Link href={`/panel/productos/${p.id}`} className="list-row__main" style={{ color: 'var(--cemento)' }}>
-                <div className="list-row__title">{p.name}</div>
-                <div className="list-row__sub tnum">{formatPrice(p.price)}</div>
+              <Link href={`/panel/productos/${p.id}`} className="lrow__m" >
+                <div className="lrow__t">{p.name}</div>
+                <div className="lrow__s tnum">{formatPrice(p.price)} · {p.isAvailable ? 'Disponible' : 'Agotado'}</div>
               </Link>
               <form action={toggleAvailability.bind(null, p.id)}>
-                <button className={`chip ${p.isAvailable ? 'chip-florece' : 'chip-outline'}`} style={{ border: 0, cursor: 'pointer', minHeight: 32 }} title="Cambiar disponibilidad">
-                  {p.isAvailable ? 'Disponible' : 'Agotado'}
-                </button>
+                <button type="submit" className="switch" role="switch" aria-checked={p.isAvailable} aria-label={p.isAvailable ? 'Disponible: tocá para marcar agotado' : 'Agotado: tocá para marcar disponible'} />
               </form>
             </div>
           ))}

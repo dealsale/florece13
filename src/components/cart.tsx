@@ -12,6 +12,10 @@ type CartContext = {
   setQuantity: (productId: string, quantity: number) => void
   remove: (productId: string) => void
   clearStore: (storeId: string) => void
+  /** Aviso flotante ("agregado al carrito"). */
+  toast: (message: string) => void
+  /** Cambia en cada agregado: dispara la animación del contador. */
+  bump: number
 }
 
 const KEY = 'f13_carrito_v1'
@@ -32,6 +36,14 @@ function read(): CartItem[] {
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [ready, setReady] = useState(false)
+  const [bump, setBump] = useState(0)
+  const [toastMsg, setToastMsg] = useState<{ text: string; id: number } | null>(null)
+  const toast = useCallback((text: string) => setToastMsg({ text, id: Date.now() }), [])
+  useEffect(() => {
+    if (!toastMsg) return
+    const t = setTimeout(() => setToastMsg(null), 2400)
+    return () => clearTimeout(t)
+  }, [toastMsg])
 
   useEffect(() => {
     setItems(read())
@@ -56,7 +68,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       items,
       ready,
       count: items.reduce((n, i) => n + i.quantity, 0),
-      add: (item, quantity = 1) =>
+      add: (item, quantity = 1) => {
+        setBump((b) => b + 1)
         commit((prev) => {
           const found = prev.find((i) => i.productId === item.productId)
           if (found)
@@ -64,7 +77,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
               i.productId === item.productId ? { ...i, quantity: Math.min(MAX_QTY, i.quantity + quantity) } : i,
             )
           return [...prev, { ...item, quantity }]
-        }),
+        })
+      },
       setQuantity: (productId, quantity) =>
         commit((prev) =>
           quantity <= 0
@@ -73,11 +87,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
         ),
       remove: (productId) => commit((prev) => prev.filter((i) => i.productId !== productId)),
       clearStore: (storeId) => commit((prev) => prev.filter((i) => i.storeId !== storeId)),
+      toast,
+      bump,
     }),
-    [items, ready, commit],
+    [items, ready, commit, toast, bump],
   )
 
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>
+  return (
+    <Ctx.Provider value={value}>
+      {children}
+      <div className={`toast ${toastMsg ? 'on' : ''}`} role="status" aria-live="polite">
+        {toastMsg && (
+          <>
+            <i>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true"><path d="m5 12 5 5L20 7" /></svg>
+            </i>
+            <span>{toastMsg.text}</span>
+          </>
+        )}
+      </div>
+    </Ctx.Provider>
+  )
 }
 
 export function useCart() {
@@ -87,10 +117,10 @@ export function useCart() {
 }
 
 export function CartCount() {
-  const { count, ready } = useCart()
+  const { count, ready, bump } = useCart()
   if (!ready || count === 0) return null
   return (
-    <span className="badge" aria-label={`${count} en el carrito`}>
+    <span key={bump} className={`badge ${bump ? 'bump' : ''}`} aria-label={`${count} en el carrito`}>
       {count > 99 ? '99+' : count}
     </span>
   )

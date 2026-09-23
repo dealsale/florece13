@@ -22,29 +22,29 @@ export default async function PedidosPage({ searchParams }: { searchParams: Prom
 
   return (
     <div>
-      <div className="panel-head"><h1 className="title">Pedidos</h1></div>
-      <div className="cat-scroller" style={{ marginBottom: 16 }}>
-        <Link href="/panel/pedidos" className="cat-pill" aria-current={!status ? 'true' : undefined}>Todos</Link>
+      <div className="phead"><h1 className="h1">Pedidos</h1></div>
+      <div className="pills" style={{ marginBottom: 16 }}>
+        <Link href="/panel/pedidos" className="pill" aria-current={!status ? 'true' : undefined}>Todos</Link>
         {ORDER_STATUSES.map((s) => (
-          <Link key={s} href={`/panel/pedidos?estado=${s}`} className="cat-pill" aria-current={status === s ? 'true' : undefined}>
+          <Link key={s} href={`/panel/pedidos?estado=${s}`} className="pill" aria-current={status === s ? 'true' : undefined}>
             {ORDER_STATUS_LABEL[s]}
           </Link>
         ))}
       </div>
       {rows.length === 0 ? (
-        <EmptyState icon="pedidos" title={status ? 'No hay pedidos en este estado.' : 'Aquí van a llegar tus pedidos.'} text="Compartí tu tienda y tu QR para que te encuentren." />
+        <EmptyState title={status ? 'No hay pedidos en este estado.' : 'Aquí van a llegar tus pedidos.'} text="Compartí tu tienda y tu QR para que te encuentren." />
       ) : (
         <div className="list">
           {rows.map((o) => (
-            <Link key={o.id} href={`/panel/pedidos/${o.id}`} className="list-row">
-              <div className="list-row__main">
-                <div className="list-row__title">{o.customerName}</div>
-                <div className="list-row__sub">
+            <Link key={o.id} href={`/panel/pedidos/${o.id}`} className="lrow">
+              <div className="lrow__m">
+                <div className="lrow__t">{o.customerName}</div>
+                <div className="lrow__s">
                   {o.code} · {formatDate(o.createdAt)} · {o.deliveryMethod === 'ENVIO' ? `Envío a ${o.city}` : 'Recoge'}
                 </div>
               </div>
               <span className="price tnum">{formatPrice(o.total)}</span>
-              <span className={`chip status-${o.status}`}>{ORDER_STATUS_LABEL[o.status]}</span>
+              <span className={`chip st-${o.status}`}>{ORDER_STATUS_LABEL[o.status]}</span>
             </Link>
           ))}
         </div>

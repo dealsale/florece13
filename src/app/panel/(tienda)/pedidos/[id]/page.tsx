@@ -32,23 +32,23 @@ export default async function PedidoPanelPage({ params }: { params: Promise<{ id
   return (
     <div className="stack" style={{ ['--gap' as string]: '20px' }}>
       <Link href="/panel/pedidos" className="small" style={{ fontWeight: 700 }}>← Pedidos</Link>
-      <div className="panel-head" style={{ marginBottom: 0 }}>
+      <div className="phead" style={{ marginBottom: 0 }}>
         <div>
-          <p className="label-muted">{formatDate(order.createdAt)}</p>
-          <h1 className="title">Pedido {order.code}</h1>
+          <p className="eyebrow">{formatDate(order.createdAt)}</p>
+          <h1 className="h1">Pedido {order.code}</h1>
         </div>
-        <span className={`chip status-${order.status}`} style={{ fontSize: 13 }}>{ORDER_STATUS_LABEL[order.status]}</span>
+        <span className={`chip st-${order.status}`} style={{ fontSize: 13 }}>{ORDER_STATUS_LABEL[order.status]}</span>
       </div>
 
-      <div className="card card-pad stack" style={{ ['--gap' as string]: '10px' }}>
-        <h2 className="subtitle">{order.customerName}</h2>
+      <div className="card pad stack" style={{ ['--gap' as string]: '10px' }}>
+        <h2 className="h3">{order.customerName}</h2>
         <p className="tnum">{displayPhone(order.customerPhone)}{order.customerEmail && ` · ${order.customerEmail}`}</p>
         <p className="muted">
           {order.deliveryMethod === 'ENVIO' ? <>Envío a <strong style={{ color: 'var(--cemento)' }}>{order.address}, {order.city}</strong></> : 'Recoge en la tienda'}
         </p>
-        {order.notes && <p className="alert alert-info" style={{ fontWeight: 500 }}>“{order.notes}”</p>}
+        {order.notes && <p className="note note-info" style={{ fontWeight: 500 }}>“{order.notes}”</p>}
         <div className="row">
-          <a className="btn btn-whatsapp" href={waLink(order.customerPhone, replies.CONFIRMADO)} target="_blank" rel="noopener noreferrer">
+          <a className="btn btn-wa" href={waLink(order.customerPhone, replies.CONFIRMADO)} target="_blank" rel="noopener noreferrer">
             <Icon name="whatsapp" size={20} /> Escribirle
           </a>
           {order.status === 'ENVIADO' && (
@@ -57,23 +57,23 @@ export default async function PedidoPanelPage({ params }: { params: Promise<{ id
         </div>
       </div>
 
-      <div className="card card-pad">
+      <div className="card pad">
         {order.items.map((i) => (
-          <div key={i.id} className="summary-line">
+          <div key={i.id} className="line">
             <span>{i.quantity} × {i.productId ? <Link href={`/p/${i.productId}`}>{i.name}</Link> : i.name}</span>
             <span className="tnum">{formatPrice(i.unitPrice * i.quantity)}</span>
           </div>
         ))}
-        <div className="totals" style={{ borderTop: '1px solid var(--linea)', paddingTop: 12, marginTop: 6 }}>
+        <div className="total" style={{ borderTop: '1px solid var(--linea)', paddingTop: 12, marginTop: 6 }}>
           <span>Total productos</span>
           <strong className="tnum">{formatPrice(order.total)}</strong>
         </div>
       </div>
 
-      <form action={setOrderStatus.bind(null, order.id)} className="card card-pad stack" style={{ ['--gap' as string]: '12px' }}>
-        <h2 className="subtitle">Estado del pedido</h2>
+      <form action={setOrderStatus.bind(null, order.id)} className="card pad stack" style={{ ['--gap' as string]: '12px' }}>
+        <h2 className="h3">Estado del pedido</h2>
         <p className="small muted">El comprador ve este estado en el link de su pedido.</p>
-        <div className="choice-group">
+        <div className="choices">
           {ORDER_STATUSES.map((s) => (
             <label key={s} className="choice">
               <input type="radio" name="status" value={s} defaultChecked={order.status === s} />
@@ -81,7 +81,7 @@ export default async function PedidoPanelPage({ params }: { params: Promise<{ id
             </label>
           ))}
         </div>
-        <button type="submit" className="btn btn-dark" style={{ alignSelf: 'flex-start' }}>Actualizar estado</button>
+        <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-start' }}>Actualizar estado</button>
       </form>
     </div>
   )

@@ -33,11 +33,11 @@ La vitrina digital de los comercios de la Comuna 13 de Medellín. Cada tienda de
 - **PostgreSQL** con **Drizzle ORM** (migraciones SQL versionadas en `drizzle/`)
 - Sesiones propias: clave con bcrypt y cookie httpOnly; en la base se guarda solo el hash SHA-256 del token
 - Fotos: `sharp` + disco local o cualquier almacenamiento compatible con S3 (AWS S3, Cloudflare R2, DigitalOcean Spaces, MinIO)
-- Sistema visual del manual de marca: Archivo Black + Archivo (servidas por la misma app), paleta con variantes AA y logo en la **ruta B, "El 13 que florece"**
+- Sistema visual "mural de la 13 + app moderna": Archivo Black + Archivo + Permanent Marker (servidas por la misma app), paleta de la marca con variantes AA, logo en la **ruta B, "El 13 que florece"** e ilustraciones generativas (ladera, escalera, arte por categoría) en `src/lib/art.ts` en lugar de fotos de stock
 
 ## Puesta en marcha
 
-Requisitos: Node 20+ y PostgreSQL 14+.
+Requisitos: Node 22+ y PostgreSQL 14+.
 
 ```bash
 npm install
@@ -58,21 +58,43 @@ Primer uso: registrate en `/registro` con un correo de `ADMIN_EMAILS` para tener
 | `DATABASE_URL` | Conexión a PostgreSQL |
 | `APP_URL` | URL pública (se usa en el QR, los links de WhatsApp y el sitemap) |
 | `ADMIN_EMAILS` | Correos con rol de administrador, separados por coma |
-| `STORAGE_DRIVER` | `local` (carpeta `./uploads`) o `s3` |
+| `STORAGE_DRIVER` | `local` (disco) o `s3` |
+| `UPLOAD_DIR` | Carpeta de fotos con `local` (por defecto `./uploads`; en Railway `/data/uploads`) |
 | `S3_BUCKET`, `S3_REGION`, `S3_ENDPOINT`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Credenciales del bucket (solo con `s3`) |
 | `S3_PUBLIC_URL` | URL pública del bucket, sin `/` al final |
 
-## Producción
+## Publicar en Railway
+
+El repo ya trae `railway.json`: Railway construye con `npm run build`, corre las migraciones y las categorías antes de cada despliegue (`npm run release`) y arranca con `npm start`. El chequeo de salud es `/api/salud`.
+
+1. En [railway.com](https://railway.com) → **New Project** → **Deploy from GitHub repo** → elegí `florece13`.
+2. En el mismo proyecto: **+ New** → **Database** → **PostgreSQL**.
+3. En el servicio de la app → **Settings → Volumes** → **Add volume** con ruta de montaje `/data`. Ahí quedan las fotos.
+4. En el servicio de la app → **Variables**:
+
+   | Variable | Valor |
+   | --- | --- |
+   | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (referencia al Postgres del paso 2) |
+   | `STORAGE_DRIVER` | `local` |
+   | `UPLOAD_DIR` | `/data/uploads` |
+   | `ADMIN_EMAILS` | tu correo (el que va a aprobar tiendas) |
+   | `APP_URL` | la URL pública del paso 5 |
+
+5. **Settings → Networking → Generate Domain**. Copiá la URL (p. ej. `https://florece13.up.railway.app`) a `APP_URL` y redesplegá.
+6. Entrá a `/registro` con el correo de `ADMIN_EMAILS`: esa cuenta queda como administradora.
+
+Para un dominio propio: **Settings → Networking → Custom Domain** y actualizá `APP_URL`.
+
+## Producción en otro hosting
 
 ```bash
 npm run build
-npm run db:migrate
+npm run release   # migraciones + categorías
 npm start
 ```
 
-- En hosting sin disco persistente (Vercel, Railway, Render, contenedores) usá `STORAGE_DRIVER=s3`: con `local` las fotos se pierden en cada despliegue.
+- Sin disco persistente (Vercel, contenedores efímeros) usá `STORAGE_DRIVER=s3`: con `local` las fotos se pierden en cada despliegue.
 - El bucket debe permitir lectura pública de los objetos (o ponerle un CDN delante) y `S3_PUBLIC_URL` debe apuntar ahí.
-- Todas las páginas se renderizan en cada request (el contenido cambia constantemente y depende de la sesión).
 
 ## Estructura
 
@@ -92,9 +114,10 @@ src/
     api/subir/         subida de fotos
     media/[...key]/    fotos en disco (STORAGE_DRIVER=local)
   components/          UI compartida (logo, íconos, tarjetas, carrito, subida de fotos)
-  db/                  esquema Drizzle, cliente, migrador y seed
+  db/                  esquema Drizzle y cliente
   lib/                 auth, queries, storage, formato, WhatsApp, server actions
 drizzle/               migraciones SQL
+scripts/               migrate.mjs y seed.mjs (se corren en cada despliegue)
 docs/diseno/           briefing, manual de marca y handoff de Claude Design
 ```
 

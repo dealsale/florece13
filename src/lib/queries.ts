@@ -12,6 +12,8 @@ export type ProductCardData = {
   isAvailable: boolean
   storeName: string
   storeSlug: string
+  storeId: string
+  categorySlug: string | null
 }
 
 export const getCategories = cache(async () =>
@@ -33,6 +35,8 @@ const cardColumns = {
   imageUrl: firstImage,
   storeName: stores.name,
   storeSlug: stores.slug,
+  storeId: stores.id,
+  categorySlug: categories.slug,
 }
 
 /** Productos visibles al público: de tiendas aprobadas. */
@@ -64,6 +68,7 @@ export async function listProducts(opts: {
     .select(cardColumns)
     .from(products)
     .innerJoin(stores, eq(stores.id, products.storeId))
+    .leftJoin(categories, eq(categories.id, products.categoryId))
     .where(and(...where))
     .orderBy(desc(products.createdAt))
     .limit(opts.limit ?? 24)
@@ -91,6 +96,7 @@ export async function listStores(opts: { q?: string; categorySlug?: string; limi
       logoUrl: stores.logoUrl,
       coverUrl: stores.coverUrl,
       categoryName: categories.name,
+      categorySlug: categories.slug,
       productCount: sql<number>`(
         select count(*)::int from ${products}
         where ${products.storeId} = ${stores.id} and ${products.isAvailable}
@@ -129,8 +135,32 @@ export async function getProductsForCart(ids: string[]) {
   const valid = ids.filter((id) => /^[0-9a-f-]{36}$/i.test(id))
   if (valid.length === 0) return []
   return db
-    .select({ ...cardColumns, storeId: stores.id, storeStatus: stores.status })
+    .select({ ...cardColumns, storeStatus: stores.status })
     .from(products)
     .innerJoin(stores, eq(stores.id, products.storeId))
+    .leftJoin(categories, eq(categories.id, products.categoryId))
     .where(inArray(products.id, valid))
+}
+
+/** Números del barrio para el inicio: tiendas, productos, sectores y productos por categoría. */
+export async function getHomeStats() {
+  const [[totals], perCategory] = await Promise.all([
+    db
+      .select({
+        stores: sql<number>`count(distinct ${stores.id})::int`,
+        products: sql<number>`count(${products.id})::int`,
+        sectors: sql<number>`count(distinct nullif(${stores.sector}, ''))::int`,
+      })
+      .from(stores)
+      .leftJoin(products, and(eq(products.storeId, stores.id), eq(products.isAvailable, true)))
+      .where(eq(stores.status, 'ACTIVE')),
+    db
+      .select({ slug: categories.slug, n: sql<number>`count(${products.id})::int` })
+      .from(categories)
+      .leftJoin(products, and(eq(products.categoryId, categories.id), eq(products.isAvailable, true)))
+      .leftJoin(stores, eq(stores.id, products.storeId))
+      .where(or(sql`${products.id} is null`, eq(stores.status, 'ACTIVE')))
+      .groupBy(categories.slug),
+  ])
+  return { ...totals, perCategory: Object.fromEntries(perCategory.map((c) => [c.slug, c.n])) as Record<string, number> }
 }

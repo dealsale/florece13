@@ -1,12 +1,12 @@
 import { formatPrice } from '@/lib/format'
 
-export function Price({ value, compareAt, className = '' }: { value: number; compareAt?: number | null; className?: string }) {
+export function Price({ value, compareAt, className = '', style }: { value: number; compareAt?: number | null; className?: string; style?: React.CSSProperties }) {
   return (
-    <div className={`price ${className}`}>
+    <div className={`price ${className}`} style={style}>
       {formatPrice(value)}
       {compareAt && compareAt > value ? (
         <s>
-          <span className="visually-hidden">Antes </span>
+          <span className="vh">Antes </span>
           {formatPrice(compareAt)}
         </s>
       ) : null}

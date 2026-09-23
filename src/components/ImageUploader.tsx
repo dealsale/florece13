@@ -40,34 +40,34 @@ export function ImageUploader({ name, initial = [] }: { name: string; initial?: 
   return (
     <div className="stack" style={{ ['--gap' as string]: '8px' }}>
       <input type="hidden" name={name} value={JSON.stringify(urls)} />
-      <div className="uploader">
+      <div className="up">
         {urls.map((url, i) => (
-          <div key={url} className="uploader__item">
+          <div key={url} className="up__it">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={url} alt={`Foto ${i + 1}`} />
-            {i === 0 && <span className="chip">Principal</span>}
-            <button type="button" className="uploader__remove" onClick={() => setUrls((u) => u.filter((x) => x !== url))} aria-label="Quitar foto">
+            {i === 0 && <span className="chip chip-dark">Principal</span>}
+            <button type="button" className="up__x" onClick={() => setUrls((u) => u.filter((x) => x !== url))} aria-label="Quitar foto">
               <Icon name="cerrar" size={16} />
             </button>
             {urls.length > 1 && (
-              <div className="uploader__move">
+              <div className="up__mv">
                 {i > 0 && <button type="button" onClick={() => move(i, -1)} aria-label="Mover antes">◀</button>}
                 {i < urls.length - 1 && <button type="button" onClick={() => move(i, 1)} aria-label="Mover después">▶</button>}
               </div>
             )}
           </div>
         ))}
-        {Array.from({ length: busy }).map((_, i) => <div key={`b${i}`} className="uploader__item loading-block" />)}
+        {Array.from({ length: busy }).map((_, i) => <div key={`b${i}`} className="up__it shimmer" />)}
         {urls.length + busy < MAX && (
-          <label className="uploader__add">
+          <label className="up__add">
             <Icon name="camara" size={26} />
             {urls.length === 0 ? 'Agregar fotos' : 'Agregar'}
-            <input ref={input} type="file" accept="image/*" multiple className="visually-hidden" onChange={(e) => onFiles(e.target.files)} />
+            <input ref={input} type="file" accept="image/*" multiple className="vh" onChange={(e) => onFiles(e.target.files)} />
           </label>
         )}
       </div>
-      <span className="field-hint">Hasta {MAX} fotos. La primera es la principal. Fondo liso, luz de día, una sola pieza por foto.</span>
-      {error && <span className="field-error">{error}</span>}
+      <span className="hint">Hasta {MAX} fotos. La primera es la principal. Fondo liso, luz de día, una sola pieza por foto.</span>
+      {error && <span className="ferr">{error}</span>}
     </div>
   )
 }
@@ -102,23 +102,23 @@ export function SingleImageField({
   }
   return (
     <div className="field">
-      <span className="field-label">{label}</span>
+      <span className="flabel">{label}</span>
       <input type="hidden" name={name} value={url} />
-      <div className="image-field">
-        <div className={`image-field__preview ${tipo === 'portada' ? 'image-field__preview--wide' : ''} ${busy ? 'loading-block' : ''}`}>
+      <div className="imgf">
+        <div className={`imgf__p ${tipo === 'portada' ? 'wide' : ''} ${busy ? 'shimmer' : ''}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {url ? <img src={url} alt="" /> : !busy && <Icon name="camara" size={28} />}
         </div>
         <div className="row" style={{ ['--gap' as string]: '8px' }}>
           <label className="btn btn-outline btn-sm">
             {url ? 'Cambiar' : 'Subir foto'}
-            <input type="file" accept="image/*" className="visually-hidden" onChange={(e) => onFile(e.target.files?.[0])} />
+            <input type="file" accept="image/*" className="vh" onChange={(e) => onFile(e.target.files?.[0])} />
           </label>
           {url && <button type="button" className="btn btn-ghost btn-sm" onClick={() => setUrl('')}>Quitar</button>}
         </div>
       </div>
-      {hint && <span className="field-hint">{hint}</span>}
-      {error && <span className="field-error">{error}</span>}
+      {hint && <span className="hint">{hint}</span>}
+      {error && <span className="ferr">{error}</span>}
     </div>
   )
 }

@@ -26,10 +26,10 @@ export default async function CheckoutPage({ params }: { params: Promise<{ store
   if (!store || store.status !== 'ACTIVE') notFound()
 
   return (
-    <div className="container">
-      <section className="section" style={{ paddingTop: 28 }}>
-        <p className="label-muted">Pedido a</p>
-        <h1 className="title" style={{ marginBottom: 24 }}>{store.name}</h1>
+    <div className="wrap">
+      <section style={{ paddingTop: 28 }}>
+        <span className="eyebrow">Pedido a</span>
+        <h1 className="h1" style={{ margin: '6px 0 24px' }}>{store.name}</h1>
         <CheckoutForm store={store} />
       </section>
     </div>

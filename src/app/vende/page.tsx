@@ -1,97 +1,100 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Icon } from '@/components/Icon'
-import { LogoMark } from '@/components/Logo'
-import { getCurrentUser } from '@/lib/auth'
+import { Svg } from '@/components/Svg'
+import { stairs } from '@/lib/art'
+import { getCurrentUser, getStoreForUser } from '@/lib/auth'
 
 export const metadata: Metadata = {
   title: 'Vendé en Florece 13',
   description: 'Abrí tu tienda de la Comuna 13 en línea y recibí pedidos de todo el país directo en tu WhatsApp.',
 }
 
+const HERO_STAIRS = stairs('rgba(255,255,255,.14)', 7, 520, 320)
 const STEPS = [
-  { title: 'Creá tu cuenta', text: 'Tu nombre, tu correo y una clave. Dos minutos.' },
-  { title: 'Armá tu tienda', text: 'Nombre, WhatsApp, tu sector de la 13, logo, portada y tu historia.' },
-  { title: 'Publicá tus productos', text: 'Foto, precio y descripción, desde el celular.' },
-  { title: 'Recibí pedidos', text: 'Te llegan a tu WhatsApp con todo el detalle, y los ves ordenados en tu panel.' },
+  ['#E5379B', 'Creá tu cuenta', 'Tu nombre, tu correo y una clave. Dos minutos.'],
+  ['#FF8A00', 'Armá tu tienda', 'Nombre, WhatsApp, tu sector de la 13, logo, portada y tu historia.'],
+  ['#17BEBB', 'Subí tus productos', 'Foto, precio y descripción, desde el celular.'],
+  ['#128C4B', 'Recibí pedidos', 'Te llegan a tu WhatsApp y los ves ordenados en tu panel.'],
+]
+const FEATS = [
+  ['var(--tint-verde)', 'var(--verde)', 'whatsapp', 'Pedidos a tu WhatsApp', 'El comprador arma su pedido y te lo manda escrito. Vos acordás el pago (Nequi, transferencia, contraentrega) y el envío.'],
+  ['var(--tint-fucsia)', 'var(--fucsia-t)', 'tienda', 'Tu propia tienda', 'Con tu link, tu portada, tu catálogo y tu historia. Compartila en Instagram y en tus estados.'],
+  ['var(--tint-naranja)', 'var(--naranja-t)', 'qr', 'QR para tu local', 'Imprimí tu sticker “Florece aquí”: el turista lo escanea y te sigue comprando desde su casa.'],
+  ['var(--tint-turquesa)', 'var(--turquesa-t)', 'escudo', 'Solo gente de la 13', 'Revisamos cada tienda antes de publicarla. El comprador sabe que le compra al barrio.'],
+]
+const PHOTO_TIPS = [
+  ['Fondo liso', 'Un muro o una tela de un solo color. Que nada distraiga del producto.'],
+  ['Luz de día', 'Cerca de una ventana o en la calle a la sombra. Sin flash.'],
+  ['Una pieza por foto', 'Producto centrado. Si tiene detalles, tomale otra foto de cerca.'],
+  ['Siempre real', 'Tus productos, tus manos, tu local. Nada de fotos sacadas de internet.'],
 ]
 
 export default async function VendePage() {
   const user = await getCurrentUser()
-  const cta = user ? { href: '/panel', label: 'Ir a mi tienda' } : { href: '/registro', label: 'Abrí tu tienda gratis' }
+  const store = user ? await getStoreForUser(user.id) : null
+  const cta = store
+    ? { href: '/panel', label: 'Ir a mi tienda' }
+    : user
+      ? { href: '/panel/crear-tienda', label: 'Crear mi tienda' }
+      : { href: '/registro', label: 'Abrí tu tienda gratis' }
+
   return (
     <>
-      <section className="panel-dark">
-        <div className="container" style={{ padding: 'clamp(40px, 8vw, 96px) var(--gutter)' }}>
-          <LogoMark size={64} tone="light" />
-          <h1 className="display" style={{ marginTop: 24, maxWidth: '12ch' }}>Tu negocio florece aquí.</h1>
-          <p style={{ fontSize: 'clamp(17px, 2.2vw, 21px)', lineHeight: 1.5, color: '#BDB5A9', maxWidth: '48ch', marginTop: 18 }}>
-            La vitrina en línea de los comercios de la Comuna 13. Mostrale tus productos a toda Colombia y recibí los pedidos en tu WhatsApp, como ya
-            trabajás hoy.
+      <section className="v-hero">
+        <div className="wrap">
+          <span className="tag rise">para comerciantes de la 13</span>
+          <h1 className="display rise" style={{ ['--i' as string]: 1, maxWidth: '11ch' }}>Tu negocio florece aquí.</h1>
+          <p className="rise" style={{ ['--i' as string]: 2 }}>
+            La vitrina en línea de los comercios de la Comuna 13. Mostrale tus productos a toda Colombia y recibí los pedidos en tu WhatsApp, como ya trabajás hoy.
           </p>
-          <div className="row" style={{ marginTop: 28 }}>
-            <Link href={cta.href} className="btn btn-primary btn-lg">{cta.label}</Link>
-            {!user && <Link href="/entrar" className="btn btn-outline btn-lg" style={{ color: 'var(--hueso)', borderColor: 'var(--hueso)' }}>Ya tengo tienda</Link>}
+          <div className="row rise" style={{ ['--i' as string]: 3 }}>
+            <Link href={cta.href} className="btn btn-light btn-lg">{cta.label} <Icon name="flecha" size={18} /></Link>
+            {!user && <Link href="/entrar" className="btn btn-ghost" style={{ ['--fg' as string]: '#fff' }}>Ya tengo tienda</Link>}
           </div>
         </div>
-        <div className="mural-band" aria-hidden="true" />
+        <div className="v-hero__art"><Svg html={HERO_STAIRS} /></div>
       </section>
 
-      <div className="container">
-        <section className="section">
-          <h2 className="title" style={{ marginBottom: 20 }}>Así de fácil</h2>
-          <div className="pitch-grid">
-            {STEPS.map((s, i) => (
-              <div key={s.title}>
-                <span className="pitch-num">0{i + 1}</span>
-                <h3 className="subtitle">{s.title}</h3>
-                <p className="muted">{s.text}</p>
+      <div className="wrap">
+        <section className="sec">
+          <div className="sec__head"><div><span className="tag">así de fácil</span><h2 className="h2">De la terraza al país en 4 pasos</h2></div></div>
+          <div className="steps">
+            {STEPS.map(([c, t, d], i) => (
+              <div key={t} className="step rise" style={{ ['--i' as string]: i, ['--c' as string]: c }}><b>{i + 1}</b><h3 className="h3">{t}</h3><p className="muted">{d}</p></div>
+            ))}
+          </div>
+        </section>
+
+        <section className="sec">
+          <div className="feat">
+            {FEATS.map(([c, ink, ic, t, d], i) => (
+              <div key={t} className="rise" style={{ ['--i' as string]: i, ['--c' as string]: c, ['--ink' as string]: ink }}>
+                <i><Icon name={ic} size={26} /></i>
+                <h3 className="h3">{t}</h3>
+                <p style={{ color: 'var(--tinta-2)' }}>{d}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="section">
-          <div className="pitch-grid">
-            <div>
-              <Icon name="whatsapp" size={28} />
-              <h3 className="subtitle">Pedidos a tu WhatsApp</h3>
-              <p className="muted">El comprador arma su pedido y te lo manda escrito. Vos acordás el pago (Nequi, transferencia, contraentrega) y el envío.</p>
-            </div>
-            <div>
-              <Icon name="tienda" size={28} />
-              <h3 className="subtitle">Tu propia tienda</h3>
-              <p className="muted">Con tu link, tu portada, tu catálogo y tu historia. Compartila en Instagram y en tus estados.</p>
-            </div>
-            <div>
-              <Icon name="qr" size={28} />
-              <h3 className="subtitle">QR para tu local</h3>
-              <p className="muted">Imprimí tu sticker “Florece aquí”. El turista lo escanea y te sigue comprando cuando vuelve a su casa.</p>
-            </div>
-            <div>
-              <Icon name="escudo" size={28} />
-              <h3 className="subtitle">Solo gente de la 13</h3>
-              <p className="muted">Revisamos cada tienda antes de publicarla. Así el comprador sabe que le está comprando al barrio.</p>
+        <section className="sec" id="fotos">
+          <div className="s-story">
+            <span className="tag">guía de fotos</span>
+            <h2 className="h2">Tu foto es el corazón de la ficha</h2>
+            <div className="feat">
+              {PHOTO_TIPS.map(([t, d]) => (
+                <div key={t} style={{ ['--c' as string]: 'var(--hueso)', padding: 16 }}><strong>{t}</strong><span className="muted">{d}</span></div>
+              ))}
             </div>
           </div>
         </section>
 
-        <section className="section" id="fotos">
-          <div className="card card-pad stack" style={{ ['--gap' as string]: '14px' }}>
-            <h2 className="title-sm">Guía de fotos: tu foto es el corazón de la ficha</h2>
-            <div className="pitch-grid" style={{ border: 0, background: 'transparent', gap: 20 }}>
-              <div style={{ padding: 0 }}><strong>Fondo liso</strong><p className="muted">Un muro o una tela de un solo color. Que nada distraiga del producto.</p></div>
-              <div style={{ padding: 0 }}><strong>Luz de día</strong><p className="muted">Cerca de una ventana o en la calle a la sombra. Sin flash.</p></div>
-              <div style={{ padding: 0 }}><strong>Una pieza por foto</strong><p className="muted">Producto centrado. Si tiene detalles, tomale otra foto de cerca.</p></div>
-              <div style={{ padding: 0 }}><strong>Siempre real</strong><p className="muted">Tus productos, tus manos, tu local. Nada de fotos sacadas de internet.</p></div>
-            </div>
-          </div>
-        </section>
-
-        <section className="section">
-          <div className="panel-dark card-pad" style={{ display: 'grid', gap: 18, textAlign: 'center', justifyItems: 'center' }}>
-            <h2 className="title">Del barrio, para todo el país.</h2>
-            <Link href={cta.href} className="btn btn-primary btn-lg">{cta.label}</Link>
+        <section className="sec">
+          <div className="cta" style={{ textAlign: 'center', justifyItems: 'center' }}>
+            <span className="tag">¿listo?</span>
+            <h2 className="h1">Del barrio, para todo el país.</h2>
+            <Link href={cta.href} className="btn btn-primary btn-lg">{cta.label} <Icon name="flecha" size={18} /></Link>
           </div>
         </section>
       </div>

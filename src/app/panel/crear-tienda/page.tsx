@@ -12,10 +12,10 @@ export default async function CrearTiendaPage() {
   if (await getStoreForUser(user.id)) redirect('/panel')
   const categories = await getCategories()
   return (
-    <div className="auth-wrap stack" style={{ maxWidth: 560, ['--gap' as string]: '20px' }}>
+    <div className="auth auth--wide" style={{ maxWidth: 560, ['--gap' as string]: '20px' }}>
       <div>
         <span className="chip chip-florece">Paso 2 de 2</span>
-        <h1 className="title" style={{ marginTop: 12 }}>Armemos tu tienda, {user.name.split(' ')[0]}.</h1>
+        <h1 className="h1" style={{ marginTop: 12 }}>Armemos tu tienda, {user.name.split(' ')[0]}.</h1>
         <p className="muted" style={{ marginTop: 6 }}>Lo básico para empezar. Foto, portada e historia las agregás después.</p>
       </div>
       <CreateStoreForm categories={categories.map((c) => ({ id: c.id, name: c.name }))} sectores={SECTORES} />

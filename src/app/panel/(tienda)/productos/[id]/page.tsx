@@ -22,8 +22,8 @@ export default async function EditarProductoPage({ params }: { params: Promise<{
   return (
     <div>
       <Link href="/panel/productos" className="small" style={{ fontWeight: 700 }}>← Productos</Link>
-      <div className="panel-head" style={{ marginTop: 8 }}>
-        <h1 className="title">Editar producto</h1>
+      <div className="phead" style={{ marginTop: 8 }}>
+        <h1 className="h1">Editar producto</h1>
         <Link href={`/p/${product.id}`} className="btn btn-ghost btn-sm">Ver como comprador</Link>
       </div>
       <ProductForm

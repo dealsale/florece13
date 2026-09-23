@@ -2,6 +2,8 @@ import '@fontsource/archivo/400.css'
 import '@fontsource/archivo/500.css'
 import '@fontsource/archivo/600.css'
 import '@fontsource/archivo/700.css'
+import '@fontsource/archivo/800.css'
+import '@fontsource/permanent-marker/400.css'
 import '@fontsource/archivo-black/400.css'
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
@@ -39,7 +41,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <CartProvider>
           <Header />
-          <main className="app-main">{children}</main>
+          <main>{children}</main>
           <Footer />
           <TabBar loggedIn={Boolean(user)} />
         </CartProvider>

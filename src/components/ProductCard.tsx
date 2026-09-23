@@ -1,25 +1,31 @@
 import Link from 'next/link'
+import { CATEGORY_COLORS, productArt } from '@/lib/art'
 import type { ProductCardData } from '@/lib/queries'
-import { Icon } from './Icon'
 import { Price } from './Price'
+import { QuickAdd } from './QuickAdd'
+import { Svg } from './Svg'
 
-export function ProductCard({ product, showStore = true }: { product: ProductCardData; showStore?: boolean }) {
+export function ProductCard({ product: p, showStore = true, i = 0 }: { product: ProductCardData; showStore?: boolean; i?: number }) {
   return (
-    <Link href={`/p/${product.id}`} className="product-card">
-      <div className="product-card__img">
-        {product.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={product.imageUrl} alt="" loading="lazy" />
-        ) : (
-          <div className="no-photo"><Icon name="camara" size={32} /></div>
+    <div className="prod rise" style={{ ['--i' as string]: Math.min(i, 10) }}>
+      <div className="prod__img">
+        <Link href={`/p/${p.id}`} aria-label={p.name} style={{ display: 'block', height: '100%' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {p.imageUrl ? <img src={p.imageUrl} alt="" loading="lazy" /> : <Svg html={productArt(p.id, p.categorySlug)} />}
+        </Link>
+        {!p.isAvailable && <span className="chip chip-dark">Agotado</span>}
+        {p.isAvailable && <QuickAdd productId={p.id} storeId={p.storeId} name={p.name} />}
+      </div>
+      <Link href={`/p/${p.id}`} className="prod__txt">
+        <span className="prod__name">{p.name}</span>
+        {showStore && (
+          <span className="prod__store">
+            <span className="dot" style={{ ['--c' as string]: CATEGORY_COLORS[p.categorySlug ?? ''] }} />
+            {p.storeName}
+          </span>
         )}
-        {!product.isAvailable && <span className="chip">Agotado</span>}
-      </div>
-      <div className="product-card__body">
-        <div className="product-card__name">{product.name}</div>
-        {showStore && <div className="product-card__store">{product.storeName}</div>}
-        <Price value={product.price} compareAt={product.compareAtPrice} />
-      </div>
-    </Link>
+        <Price value={p.price} compareAt={p.compareAtPrice} />
+      </Link>
+    </div>
   )
 }
