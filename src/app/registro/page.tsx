@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
 import { RegisterForm } from './RegisterForm'
 
-export const metadata: Metadata = { title: 'Abrí tu tienda' }
+export const metadata: Metadata = { title: 'Abrí tu tienda', robots: { index: false } }
 
 export default async function RegistroPage() {
   if (await getCurrentUser()) redirect('/panel')

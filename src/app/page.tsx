@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { EmptyState } from '@/components/EmptyState'
+import { JsonLd } from '@/components/JsonLd'
 import { Icon } from '@/components/Icon'
 import { ProductCard } from '@/components/ProductCard'
 import { StoreCard } from '@/components/StoreCard'
@@ -7,6 +8,7 @@ import { Svg } from '@/components/Svg'
 import { getStoreForUser, getCurrentUser } from '@/lib/auth'
 import { ladera, stairs } from '@/lib/art'
 import { getCategories, getHomeStats, listProducts, listStores } from '@/lib/queries'
+import { appUrl } from '@/lib/url'
 
 const WORDS = ['Mochilas tejidas', 'Café de la loma', 'Serigrafía', 'Streetwear', 'Obleas', 'Arte de muro', 'Recuerdos', 'Hecho en la 13']
 const HERO_ART = ladera('florece-hero', { w: 1400, h: 300, anim: true, flowerAt: [1180, 40, 1.6] })
@@ -23,8 +25,31 @@ export default async function HomePage() {
     user ? getStoreForUser(user.id) : null,
   ])
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        name: 'Florece 13',
+        url: appUrl('/'),
+        inLanguage: 'es-CO',
+        potentialAction: { '@type': 'SearchAction', target: `${appUrl('/buscar')}?q={q}`, 'query-input': 'required name=q' },
+      },
+      {
+        '@type': 'Organization',
+        name: 'Florece 13',
+        url: appUrl('/'),
+        logo: appUrl('/icon'),
+        slogan: 'Tu negocio florece aquí.',
+        areaServed: 'CO',
+        description: 'Marketplace de los comercios de la Comuna 13 de Medellín.',
+      },
+    ],
+  }
+
   return (
     <>
+      <JsonLd data={jsonLd} />
       <section className="hero">
         <div className="wrap hero__in">
           <span className="tag hero__tag rise">¡hecho en la 13!</span>

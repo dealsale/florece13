@@ -5,7 +5,12 @@ import { Icon } from '@/components/Icon'
 import { StoreCard } from '@/components/StoreCard'
 import { getCategories, listStores } from '@/lib/queries'
 
-export const metadata: Metadata = { title: 'Tiendas de la 13' }
+export const metadata: Metadata = {
+  title: 'Tiendas de la 13',
+  description: 'Conocé las tiendas del barrio: cada una es de alguien de la Comuna 13, con su historia y su catálogo.',
+  alternates: { canonical: '/tiendas' },
+  openGraph: { title: 'Tiendas de la 13 · Florece 13', url: '/tiendas' },
+}
 
 export default async function TiendasPage({ searchParams }: { searchParams: Promise<{ cat?: string }> }) {
   const { cat = '' } = await searchParams

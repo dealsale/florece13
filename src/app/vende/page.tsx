@@ -7,7 +7,9 @@ import { getCurrentUser, getStoreForUser } from '@/lib/auth'
 
 export const metadata: Metadata = {
   title: 'Vendé en Florece 13',
-  description: 'Abrí tu tienda de la Comuna 13 en línea y recibí pedidos de todo el país directo en tu WhatsApp.',
+  description: 'Abrí tu tienda de la Comuna 13 en línea y recibí pedidos de todo el país directo en tu WhatsApp. Sin mensualidad para empezar.',
+  alternates: { canonical: '/vende' },
+  openGraph: { title: 'Tu negocio florece aquí · Vendé en Florece 13', url: '/vende' },
 }
 
 const HERO_STAIRS = stairs('rgba(255,255,255,.14)', 7, 520, 320)

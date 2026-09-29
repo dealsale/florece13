@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { db, stores } from '@/db'
 import { CheckoutForm } from './CheckoutForm'
 
-export const metadata: Metadata = { title: 'Hacer pedido' }
+export const metadata: Metadata = { title: 'Hacer pedido', robots: { index: false } }
 
 export default async function CheckoutPage({ params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = await params

@@ -7,9 +7,11 @@ import { Gallery } from '@/components/Gallery'
 import { Icon } from '@/components/Icon'
 import { Price } from '@/components/Price'
 import { ProductCard } from '@/components/ProductCard'
+import { JsonLd } from '@/components/JsonLd'
 import { ShareButton } from '@/components/ShareButton'
 import { productArt } from '@/lib/art'
 import { getCurrentUser } from '@/lib/auth'
+import { formatPrice } from '@/lib/format'
 import { getProduct, listProducts } from '@/lib/queries'
 import { appUrl } from '@/lib/url'
 import { productMessage, waLink } from '@/lib/whatsapp'
@@ -19,10 +21,14 @@ type Params = Promise<{ id: string }>
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const product = await getProduct((await params).id)
   if (!product || product.store.status !== 'ACTIVE') return { title: 'Producto' }
+  const title = `${product.name} · ${product.store.name}`
+  const description = `${formatPrice(product.price)} · ${product.description ? product.description.slice(0, 120) + (product.description.length > 120 ? '…' : '') : `Hecho en la Comuna 13 por ${product.store.name}.`}`
   return {
-    title: `${product.name} · ${product.store.name}`,
-    description: product.description.slice(0, 160),
-    openGraph: { images: product.images[0] ? [product.images[0].url] : [] },
+    title,
+    description,
+    alternates: { canonical: `/p/${product.id}` },
+    openGraph: { type: 'website', title: `${title} · Florece 13`, description, url: `/p/${product.id}` },
+    twitter: { card: 'summary_large_image', title: `${title} · Florece 13`, description },
   }
 }
 
@@ -38,8 +44,28 @@ export default async function ProductPage({ params }: { params: Params }) {
   const wa = waLink(store.whatsapp, productMessage(product.name, product.price, url))
   const more = (await listProducts({ storeId: store.id, limit: 5 })).filter((p) => p.id !== product.id).slice(0, 4)
 
+  const abs = (u: string) => (u.startsWith('/') ? appUrl(u) : u)
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description || `Hecho en la Comuna 13 por ${store.name}.`,
+    image: product.images.length ? product.images.map((i) => abs(i.url)) : [appUrl(`/p/${product.id}/opengraph-image`)],
+    ...(product.category && { category: product.category.name }),
+    brand: { '@type': 'Brand', name: store.name },
+    offers: {
+      '@type': 'Offer',
+      url,
+      priceCurrency: 'COP',
+      price: product.price,
+      availability: product.isAvailable ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      seller: { '@type': 'Organization', name: store.name, url: appUrl(`/t/${store.slug}`) },
+    },
+  }
+
   return (
     <div className="wrap">
+      {store.status === 'ACTIVE' && <JsonLd data={jsonLd} />}
       <div style={{ paddingTop: 16 }}>
         <Link href={`/t/${store.slug}`} className="more"><Icon name="atras" size={16} /> {store.name}</Link>
       </div>

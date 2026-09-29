@@ -17,14 +17,31 @@ import { appUrl } from '@/lib/url'
 // Todo el contenido sale de la base de datos y de la sesión: se renderiza en cada request.
 export const dynamic = 'force-dynamic'
 
+const DESCRIPTION =
+  'La vitrina digital de los comercios de la Comuna 13 de Medellín: artesanías, ropa, arte, recuerdos y sabores del barrio, directo de quienes los hacen. Pedí por WhatsApp y recibí en todo Colombia.'
+
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl()),
-  title: { default: 'Florece 13 · La Comuna 13, en línea', template: '%s · Florece 13' },
-  description:
-    'La vitrina digital de los comercios de la Comuna 13 de Medellín. Artesanías, ropa, arte, comida y más, directo de quienes lo hacen.',
+  title: { default: 'Florece 13 · Del barrio, para todo el país', template: '%s · Florece 13' },
+  description: DESCRIPTION,
   applicationName: 'Florece 13',
+  keywords: ['Comuna 13', 'Medellín', 'artesanías', 'hecho a mano', 'tienda en línea', 'emprendedores', 'recuerdos de Medellín', 'streetwear', 'marketplace Colombia'],
+  alternates: { canonical: '/' },
   appleWebApp: { capable: true, title: 'Florece 13', statusBarStyle: 'default' },
-  openGraph: { siteName: 'Florece 13', locale: 'es_CO', type: 'website' },
+  formatDetection: { telephone: false },
+  openGraph: {
+    type: 'website',
+    siteName: 'Florece 13',
+    locale: 'es_CO',
+    url: '/',
+    title: 'Florece 13 · Del barrio, para todo el país',
+    description: DESCRIPTION,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Florece 13 · Del barrio, para todo el país',
+    description: DESCRIPTION,
+  },
 }
 
 export const viewport: Viewport = {

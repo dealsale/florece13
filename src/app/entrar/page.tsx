@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
 import { LoginForm } from './LoginForm'
 
-export const metadata: Metadata = { title: 'Entrar' }
+export const metadata: Metadata = { title: 'Entrar', robots: { index: false } }
 
 export default async function EntrarPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next = '' } = await searchParams

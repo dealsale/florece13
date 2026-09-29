@@ -6,7 +6,12 @@ import { ProductCard } from '@/components/ProductCard'
 import { StoreCard } from '@/components/StoreCard'
 import { getCategories, listProducts, listStores } from '@/lib/queries'
 
-export const metadata: Metadata = { title: 'Explorar productos' }
+export const metadata: Metadata = {
+  title: 'Productos de la Comuna 13',
+  description: 'Artesanías, ropa, arte, recuerdos y sabores hechos en la Comuna 13 de Medellín. Pedí directo a quien los hace.',
+  alternates: { canonical: '/buscar' },
+  openGraph: { title: 'Productos de la Comuna 13 · Florece 13', url: '/buscar' },
+}
 
 const PAGE_SIZE = 24
 

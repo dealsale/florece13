@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Avatar } from '@/components/Avatar'
 import { EmptyState } from '@/components/EmptyState'
+import { JsonLd } from '@/components/JsonLd'
 import { Icon } from '@/components/Icon'
 import { ProductCard } from '@/components/ProductCard'
 import { ShareButton } from '@/components/ShareButton'
@@ -18,10 +19,15 @@ type Params = Promise<{ slug: string }>
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const store = await getStoreBySlug((await params).slug)
   if (!store || store.status !== 'ACTIVE') return { title: 'Tienda' }
+  const description = [store.tagline, store.sector && `${store.sector}, Comuna 13, Medellín.`, 'Pedí directo por WhatsApp en Florece 13.']
+    .filter(Boolean)
+    .join(' ')
   return {
     title: store.name,
-    description: store.tagline || 'Tienda de la Comuna 13 en Florece 13.',
-    openGraph: { images: store.coverUrl ? [store.coverUrl] : store.logoUrl ? [store.logoUrl] : [] },
+    description,
+    alternates: { canonical: `/t/${store.slug}` },
+    openGraph: { type: 'website', title: `${store.name} · Florece 13`, description, url: `/t/${store.slug}` },
+    twitter: { card: 'summary_large_image', title: `${store.name} · Florece 13`, description },
   }
 }
 
@@ -35,8 +41,27 @@ export default async function StorePage({ params }: { params: Params }) {
   const products = await listProducts({ storeId: store.id, limit: 200, includeUnavailable: true, includeInactiveStore: preview })
   const cat = store.category
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Store',
+    name: store.name,
+    description: store.tagline || store.story.slice(0, 200),
+    url: appUrl(`/t/${store.slug}`),
+    image: appUrl(`/t/${store.slug}/opengraph-image`),
+    ...(store.logoUrl && { logo: store.logoUrl.startsWith('/') ? appUrl(store.logoUrl) : store.logoUrl }),
+    address: {
+      '@type': 'PostalAddress',
+      ...(store.address && { streetAddress: store.address }),
+      addressLocality: store.sector ? `${store.sector}, Comuna 13, Medellín` : 'Comuna 13, Medellín',
+      addressRegion: 'Antioquia',
+      addressCountry: 'CO',
+    },
+    ...(store.instagram && { sameAs: [`https://instagram.com/${store.instagram}`] }),
+  }
+
   return (
     <>
+      {!preview && <JsonLd data={jsonLd} />}
       {preview && (
         <div className="wrap" style={{ marginTop: 12 }}>
           <div className="note note-info">
