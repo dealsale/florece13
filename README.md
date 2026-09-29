@@ -11,6 +11,7 @@ La vitrina digital de los comercios de la Comuna 13 de Medellín. Cada tienda de
 - Búsqueda por texto y categoría, listado de tiendas.
 - Perfil de tienda: portada, logo, historia, sector de la 13, catálogo, WhatsApp e Instagram.
 - Ficha de producto: galería, precio (con precio anterior tachado), "Pedir por WhatsApp" y "Agregar al carrito".
+- **Instalable como app (PWA)** en iPhone, Android y computador: aviso flotante (se puede cerrar y vuelve a los 14 días) y bloque en el pie de página. En Android/Chrome abre la ventana nativa de instalación; en iOS muestra los pasos (Compartir → Agregar a pantalla de inicio); dentro de Instagram/Facebook pide abrir en el navegador. Incluye íconos maskable, pantallas de arranque para iPhone, accesos directos y un service worker que guarda los archivos de la app y las fotos, con página propia sin conexión (`public/sw.js`, `src/components/InstallApp.tsx`).
 - Carrito agrupado por tienda y checkout: el pedido **se guarda en la base de datos** y el comprador lo envía a la tienda por WhatsApp con el resumen ya escrito. Recibe un link para consultar el estado.
 
 **Comerciantes** (`/panel`):

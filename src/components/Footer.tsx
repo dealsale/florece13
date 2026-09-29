@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { InstallFooter } from './InstallApp'
 import { Logo } from './Logo'
 
 export function Footer() {
@@ -9,6 +10,7 @@ export function Footer() {
           <Logo height={34} tone="light" />
           <p style={{ maxWidth: '44ch' }}>La Comuna 13, en línea. Del barrio, para todo el país.</p>
         </div>
+        <InstallFooter />
         <div className="foot__g">
           <div>
             <h2>Comprá</h2>

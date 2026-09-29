@@ -10,8 +10,10 @@ import type { Metadata, Viewport } from 'next'
 import { CartProvider } from '@/components/cart'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
+import { INSTALL_EARLY_SCRIPT, InstallBanner, InstallProvider } from '@/components/InstallApp'
 import { TabBar } from '@/components/TabBar'
 import { getCurrentUser } from '@/lib/auth'
+import { splashStartupImages } from '@/lib/pwa'
 import { appUrl } from '@/lib/url'
 
 // Todo el contenido sale de la base de datos y de la sesión: se renderiza en cada request.
@@ -27,7 +29,9 @@ export const metadata: Metadata = {
   applicationName: 'Florece 13',
   keywords: ['Comuna 13', 'Medellín', 'artesanías', 'hecho a mano', 'tienda en línea', 'emprendedores', 'recuerdos de Medellín', 'streetwear', 'marketplace Colombia'],
   alternates: { canonical: '/' },
-  appleWebApp: { capable: true, title: 'Florece 13', statusBarStyle: 'default' },
+  appleWebApp: { capable: true, title: 'Florece 13', statusBarStyle: 'default', startupImage: splashStartupImages },
+  // iOS todavía la usa para abrir a pantalla completa y mostrar las imágenes de arranque.
+  other: { 'apple-mobile-web-app-capable': 'yes' },
   formatDetection: { telephone: false },
   openGraph: {
     type: 'website',
@@ -55,13 +59,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const user = await getCurrentUser()
   return (
     <html lang="es-CO">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: INSTALL_EARLY_SCRIPT }} />
+      </head>
       <body>
-        <CartProvider>
-          <Header />
-          <main>{children}</main>
-          <Footer />
-          <TabBar loggedIn={Boolean(user)} />
-        </CartProvider>
+        <InstallProvider>
+          <CartProvider>
+            <Header />
+            <InstallBanner />
+            <main>{children}</main>
+            <Footer />
+            <TabBar loggedIn={Boolean(user)} />
+          </CartProvider>
+        </InstallProvider>
       </body>
     </html>
   )

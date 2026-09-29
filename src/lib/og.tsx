@@ -153,3 +153,24 @@ export async function cardImage({
     { ...OG_SIZE, fonts: await fonts() },
   )
 }
+
+/** Pantalla de arranque de iOS (apple-touch-startup-image): se ve mientras abre la app instalada. */
+export async function splashImage(width: number, height: number, ladera: string) {
+  const u = Math.min(width, height) / 100
+  const laderaH = Math.round(width * 0.42)
+  return new ImageResponse(
+    (
+      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#F7F3EE', position: 'relative', fontFamily: 'Archivo' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: u * 30, height: u * 30, borderRadius: u * 7, background: '#222222', marginTop: -laderaH * 0.5 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
+          <img src={markSvg('light')} width={u * 22} height={(u * 22 * V.h) / V.w} />
+        </div>
+        <span style={{ fontFamily: 'Archivo Black', fontSize: u * 9, color: '#1F1D1B', marginTop: u * 6, letterSpacing: -u * 0.2 }}>Florece 13</span>
+        <span style={{ fontFamily: 'Marker', fontSize: u * 5.4, color: '#B4127A', marginTop: u * 1.5, transform: 'rotate(-3deg)' }}>¡hecho en la 13!</span>
+        {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
+        <img src={svgUri(ladera)} width={width} height={laderaH} style={{ position: 'absolute', left: 0, bottom: 0 }} />
+      </div>
+    ),
+    { width, height, fonts: await fonts() },
+  )
+}
