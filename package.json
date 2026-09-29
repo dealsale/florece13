@@ -12,8 +12,9 @@
     "db:migrate": "node scripts/migrate.mjs",
     "db:seed": "node scripts/seed.mjs",
     "db:studio": "drizzle-kit studio",
-    "release": "npm run db:migrate && npm run db:seed && npm run db:demo",
-    "db:demo": "node scripts/demo.mjs"
+    "release": "npm run db:migrate && npm run db:seed && npm run db:admin && npm run db:demo",
+    "db:demo": "node scripts/demo.mjs",
+    "db:admin": "node scripts/admin.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1137.0",

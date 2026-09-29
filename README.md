@@ -24,7 +24,7 @@ La vitrina digital de los comercios de la Comuna 13 de Medellín. Cada tienda de
 
 **Administración** (`/admin`):
 - Las tiendas nuevas quedan **en revisión** y no son públicas hasta que un admin las aprueba (para confirmar que son de la Comuna 13). También se pueden suspender. Si un comerciante olvida la clave, el admin le genera una temporal ("Nueva clave").
-- Quien se registre con un correo listado en `ADMIN_EMAILS` queda como administrador.
+- La cuenta de administración se crea sola en cada despliegue con el primer correo de `ADMIN_EMAILS` y la clave de `ADMIN_PASSWORD`. Si cambiás la variable, la clave se actualiza en el siguiente despliegue y se cierran las sesiones abiertas de esa cuenta. Sin `ADMIN_PASSWORD`, quien se registre con un correo de `ADMIN_EMAILS` queda como administrador.
 
 **Pagos:** en esta versión el pago y el envío se acuerdan por WhatsApp (Nequi, transferencia, contraentrega…). La base de datos ya tiene los campos para el pago en la app (`orders.channel`, `payment_status`, `payment_reference`, `stores.order_mode`), así que conectar una pasarela no requiere cambiar el modelo.
 
@@ -59,6 +59,7 @@ Primer uso: registrate en `/registro` con un correo de `ADMIN_EMAILS` para tener
 | `DATABASE_URL` | Conexión a PostgreSQL |
 | `APP_URL` | URL pública (se usa en el QR, los links de WhatsApp y el sitemap) |
 | `ADMIN_EMAILS` | Correos con rol de administrador, separados por coma |
+| `ADMIN_PASSWORD` | Clave de la cuenta admin (primer correo de `ADMIN_EMAILS`), mínimo 10 caracteres |
 | `STORAGE_DRIVER` | `local` (disco) o `s3` |
 | `UPLOAD_DIR` | Carpeta de fotos con `local` (por defecto `./uploads`; en Railway `/data/uploads`) |
 | `S3_BUCKET`, `S3_REGION`, `S3_ENDPOINT`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Credenciales del bucket (solo con `s3`) |
@@ -79,10 +80,11 @@ El repo ya trae `railway.json`: Railway construye con `npm run build` y arranca 
    | `STORAGE_DRIVER` | `local` |
    | `UPLOAD_DIR` | `/data/uploads` |
    | `ADMIN_EMAILS` | tu correo (el que va a aprobar tiendas) |
+   | `ADMIN_PASSWORD` | la clave con la que vas a entrar como admin |
    | `APP_URL` | la URL pública del paso 5 |
 
 5. **Settings → Networking → Generate Domain**. Copiá la URL (p. ej. `https://florece13.up.railway.app`) a `APP_URL` y redesplegá.
-6. Entrá a `/registro` con el correo de `ADMIN_EMAILS`: esa cuenta queda como administradora.
+6. Entrá a `/entrar` con el correo de `ADMIN_EMAILS` y la clave de `ADMIN_PASSWORD`: te lleva a `/admin`.
 
 Para un dominio propio: **Settings → Networking → Custom Domain** y actualizá `APP_URL`.
 
@@ -106,7 +108,7 @@ Clave de las tres: `Florece13-prueba` (o la que pongas en `SEED_DEMO_PASSWORD`).
 
 ```bash
 npm run build
-npm run release   # migraciones + categorías (+ tiendas de prueba si SEED_DEMO=true)
+npm run release   # migraciones + categorías + cuenta admin (+ tiendas de prueba si SEED_DEMO=true)
 npm start
 ```
 
@@ -134,7 +136,7 @@ src/
   db/                  esquema Drizzle y cliente
   lib/                 auth, queries, storage, formato, WhatsApp, server actions
 drizzle/               migraciones SQL
-scripts/               migrate.mjs y seed.mjs (se corren en cada despliegue)
+scripts/               migrate, seed, admin y demo (se corren en cada despliegue)
 docs/diseno/           briefing, manual de marca y handoff de Claude Design
 ```
 
