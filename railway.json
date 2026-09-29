@@ -4,7 +4,7 @@
     "buildCommand": "npm run build"
   },
   "deploy": {
-    "startCommand": "npm run release && npm start",
+    "startCommand": "npm start",
     "healthcheckPath": "/api/salud",
     "healthcheckTimeout": 180,
     "restartPolicyType": "ON_FAILURE"

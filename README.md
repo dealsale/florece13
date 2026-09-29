@@ -65,7 +65,7 @@ Primer uso: registrate en `/registro` con un correo de `ADMIN_EMAILS` para tener
 
 ## Publicar en Railway
 
-El repo ya trae `railway.json`: Railway construye con `npm run build` y al arrancar corre `npm run release` (migraciones, categorías y, si `SEED_DEMO` está definida, las tiendas de prueba) y después `npm start`. Si la preparación falla, la app no arranca y el error queda en los logs. El chequeo de salud es `/api/salud` (con `?completo=1` corre también las consultas del inicio).
+El repo ya trae `railway.json`: Railway construye con `npm run build` y arranca con `npm start`, que primero corre `npm run release` (migraciones, categorías y, si `SEED_DEMO` está definida, las tiendas de prueba) y después levanta Next.js. Así funciona aunque la plataforma ignore `railway.json`. Si la preparación falla, la app no arranca y el error queda en los logs. El chequeo de salud es `/api/salud` (con `?completo=1` corre también las consultas del inicio).
 
 1. En [railway.com](https://railway.com) → **New Project** → **Deploy from GitHub repo** → elegí `florece13`.
 2. En el mismo proyecto: **+ New** → **Database** → **PostgreSQL**.
