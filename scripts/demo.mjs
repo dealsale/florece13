@@ -8,6 +8,11 @@
 import bcrypt from 'bcryptjs'
 import postgres from 'postgres'
 
+// En local lee .env; en Railway las variables ya vienen del entorno.
+try {
+  process.loadEnvFile()
+} catch {}
+
 const mode = (process.env.SEED_DEMO ?? '').trim().toLowerCase()
 if (!mode || mode === 'false' || mode === '0') process.exit(0)
 

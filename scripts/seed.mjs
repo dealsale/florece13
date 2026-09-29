@@ -2,6 +2,11 @@
 // Se puede correr varias veces sin duplicar.
 import postgres from 'postgres'
 
+// En local lee .env; en Railway las variables ya vienen del entorno.
+try {
+  process.loadEnvFile()
+} catch {}
+
 const CATEGORIES = [
   ['artesanias', 'Artesanías', 'artesania'],
   ['ropa', 'Ropa y streetwear', 'ropa'],

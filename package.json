@@ -9,11 +9,11 @@
     "start": "next start",
     "lint": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "node --env-file-if-exists=.env scripts/migrate.mjs",
-    "db:seed": "node --env-file-if-exists=.env scripts/seed.mjs",
+    "db:migrate": "node scripts/migrate.mjs",
+    "db:seed": "node scripts/seed.mjs",
     "db:studio": "drizzle-kit studio",
     "release": "npm run db:migrate && npm run db:seed && npm run db:demo",
-    "db:demo": "node --env-file-if-exists=.env scripts/demo.mjs"
+    "db:demo": "node scripts/demo.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1137.0",
@@ -40,6 +40,6 @@
     "typescript": "^5.9.3"
   },
   "engines": {
-    "node": ">=22"
+    "node": "22.x"
   }
 }
