@@ -11,7 +11,22 @@ import { ORDER_STATUS_LABEL } from '@/lib/orders'
 import { appUrl } from '@/lib/url'
 import { orderMessage, waLink } from '@/lib/whatsapp'
 
-export const metadata: Metadata = { title: 'Tu pedido', robots: { index: false } }
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const order = /^[0-9a-f-]{36}$/i.test(id)
+    ? await db.query.orders.findFirst({ where: eq(orders.id, id), columns: { code: true }, with: { store: { columns: { name: true } } } })
+    : undefined
+  if (!order) return { title: 'Tu pedido', robots: { index: false } }
+  const title = `Pedido ${order.code} · ${order.store.name}`
+  const description = 'Pedido hecho en Florece 13, la vitrina de la Comuna 13. Mirá el detalle y el estado del pedido.'
+  return {
+    title,
+    description,
+    robots: { index: false },
+    openGraph: { title, description, url: `/pedido/${id}`, type: 'website' },
+    twitter: { card: 'summary_large_image', title, description },
+  }
+}
 
 const STATUS_TEXT = {
   NUEVO: 'Enviado a la tienda. Esperando confirmación.',

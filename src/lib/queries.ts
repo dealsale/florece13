@@ -20,10 +20,14 @@ export const getCategories = cache(async () =>
   db.select().from(categories).orderBy(asc(categories.position)),
 )
 
-const firstImage = sql<string | null>`(
-  select ${productImages.url} from ${productImages}
-  where ${productImages.productId} = ${products.id}
-  order by ${productImages.position} asc limit 1
+/**
+ * Primera foto de cada producto. Va con nombres de tabla explícitos: en consultas de una sola tabla
+ * Drizzle escribe las columnas sin calificar y "id" terminaría apuntando a la foto, no al producto.
+ */
+export const firstImage = sql<string | null>`(
+  select pi.url from product_images pi
+  where pi.product_id = "products"."id"
+  order by pi.position asc limit 1
 )`
 
 const cardColumns = {

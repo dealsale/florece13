@@ -12,7 +12,7 @@ import { CATEGORY_COLORS, storeCover } from '@/lib/art'
 import { getCurrentUser } from '@/lib/auth'
 import { getStoreBySlug, listProducts } from '@/lib/queries'
 import { appUrl } from '@/lib/url'
-import { waLink } from '@/lib/whatsapp'
+import { storeGreeting, waLink } from '@/lib/whatsapp'
 
 type Params = Promise<{ slug: string }>
 
@@ -87,7 +87,7 @@ export default async function StorePage({ params }: { params: Params }) {
             {store.shipsNationwide && <span className="chip"><Icon name="envio" size={14} /> Envíos a todo el país</span>}
           </div>
           <div className="s-actions">
-            <a className="btn btn-wa" href={waLink(store.whatsapp, `¡Hola, ${store.name}! Los encontré en Florece 13.`)} target="_blank" rel="noopener noreferrer">
+            <a className="btn btn-wa" href={waLink(store.whatsapp, storeGreeting(store.name, appUrl(`/t/${store.slug}`)))} target="_blank" rel="noopener noreferrer">
               <Icon name="whatsapp" size={20} /> Escribir por WhatsApp
             </a>
             {store.instagram && (

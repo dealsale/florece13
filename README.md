@@ -57,7 +57,7 @@ Primer uso: registrate en `/registro` con un correo de `ADMIN_EMAILS` para tener
 | Variable | Para qué |
 | --- | --- |
 | `DATABASE_URL` | Conexión a PostgreSQL |
-| `APP_URL` | URL pública (se usa en el QR, los links de WhatsApp y el sitemap) |
+| `APP_URL` | URL pública (QR, links de WhatsApp, sitemap, vistas previas). Si falta o apunta a `*.up.railway.app`, en producción se usa `https://florece13.shop`; quien entra por la dirección de Railway es redirigido al dominio |
 | `ADMIN_EMAILS` | Correos con rol de administrador, separados por coma |
 | `ADMIN_PASSWORD` | Clave de la cuenta admin (primer correo de `ADMIN_EMAILS`), mínimo 10 caracteres |
 | `STORAGE_DRIVER` | `local` (disco) o `s3` |

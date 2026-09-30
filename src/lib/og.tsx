@@ -186,3 +186,17 @@ export async function asJpeg(res: Response, quality = 84) {
   const jpg = await sharp(Buffer.from(await res.arrayBuffer())).flatten({ background: '#F7F3EE' }).jpeg({ quality, mozjpeg: true }).toBuffer()
   return new Response(new Uint8Array(jpg), { headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': res.headers.get('Cache-Control') ?? 'public, max-age=3600' } })
 }
+
+/** Recuadro con el logo completo, para cuando no hay fotos (misma proporción que la imagen de las tarjetas). */
+let logoTile: Promise<string> | null = null
+export function logoTileUri() {
+  logoTile ??= (async () => {
+    const logo = await sharp(path.join(BRAND_DIR, 'logo.png')).resize({ height: 800 }).toBuffer()
+    const bg = Buffer.from(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1040"><defs><radialGradient id="g" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="#FFFDF9"/><stop offset="1" stop-color="#FCE4F1"/></radialGradient></defs><rect width="1000" height="1040" fill="url(#g)"/></svg>`,
+    )
+    const jpg = await sharp(bg).composite([{ input: logo, gravity: 'center' }]).jpeg({ quality: 86 }).toBuffer()
+    return `data:image/jpeg;base64,${jpg.toString('base64')}`
+  })()
+  return logoTile
+}

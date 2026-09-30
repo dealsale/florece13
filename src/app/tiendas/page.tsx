@@ -1,3 +1,4 @@
+import { SITE_OG_IMAGE } from '@/lib/seo'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { EmptyState } from '@/components/EmptyState'
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   title: 'Tiendas de la 13',
   description: 'Conocé las tiendas del barrio: cada una es de alguien de la Comuna 13, con su historia y su catálogo.',
   alternates: { canonical: '/tiendas' },
-  openGraph: { title: 'Tiendas de la 13 · Florece 13', url: '/tiendas' },
+  openGraph: { title: 'Tiendas de la 13 · Florece 13', url: '/tiendas', images: [SITE_OG_IMAGE] },
 }
 
 export default async function TiendasPage({ searchParams }: { searchParams: Promise<{ cat?: string }> }) {

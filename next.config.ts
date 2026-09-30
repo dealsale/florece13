@@ -7,6 +7,14 @@ const nextConfig: NextConfig = {
     // Las fotos ya se optimizan al subirlas (WebP, máx. 1600 px)
     unoptimized: true,
   },
+  // Direcciones de los íconos del logo anterior (apps ya instaladas o buscadores que las guardaron).
+  async redirects() {
+    return [
+      { source: '/icon', destination: '/icons/icon-512.png', permanent: true },
+      { source: '/apple-icon', destination: '/icons/apple-touch-icon.png', permanent: true },
+      { source: '/app-icon/:name', destination: '/icons/:name', permanent: true },
+    ]
+  },
   async headers() {
     return [
       {

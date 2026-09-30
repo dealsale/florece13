@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
-import { asc, desc, eq, sql } from 'drizzle-orm'
+import { asc, desc, eq } from 'drizzle-orm'
 import Link from 'next/link'
-import { db, productImages, products } from '@/db'
+import { db, products } from '@/db'
 import { EmptyState } from '@/components/EmptyState'
 import { Icon } from '@/components/Icon'
 import { toggleAvailability } from '@/lib/actions/merchant'
 import { requireMerchant } from '@/lib/auth'
 import { formatPrice } from '@/lib/format'
+import { firstImage } from '@/lib/queries'
 
 export const metadata: Metadata = { title: 'Productos' }
 
@@ -19,7 +20,7 @@ export default async function ProductosPage({ searchParams }: { searchParams: Pr
       name: products.name,
       price: products.price,
       isAvailable: products.isAvailable,
-      imageUrl: sql<string | null>`(select ${productImages.url} from ${productImages} where ${productImages.productId} = ${products.id} order by ${productImages.position} limit 1)`,
+      imageUrl: firstImage,
     })
     .from(products)
     .where(eq(products.storeId, store.id))

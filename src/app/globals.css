@@ -334,7 +334,7 @@ main { min-height: 70vh; padding-bottom: 120px; }
 @keyframes fall { 0% { transform: translateY(0) rotate(0); opacity: 1 } 100% { transform: translateY(420px) rotate(260deg); opacity: 0 } }
 
 /* ---------- panel ---------- */
-.panel { display: grid; gap: 24px; padding-top: 20px; }
+.panel { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; padding-top: 20px; }
 @media (min-width: 900px) { .panel { grid-template-columns: 230px minmax(0, 1fr); gap: 40px; padding-top: 32px; } }
 .pnav { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-inline: calc(var(--gutter) * -1); padding: 2px var(--gutter) 6px; }
 .pnav::-webkit-scrollbar { display: none; }

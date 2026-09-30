@@ -1,3 +1,4 @@
+import { SITE_OG_IMAGE } from '@/lib/seo'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { EmptyState } from '@/components/EmptyState'
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
   title: 'Productos de la Comuna 13',
   description: 'Artesanías, ropa, arte, recuerdos y sabores hechos en la Comuna 13 de Medellín. Pedí directo a quien los hace.',
   alternates: { canonical: '/buscar' },
-  openGraph: { title: 'Productos de la Comuna 13 · Florece 13', url: '/buscar' },
+  openGraph: { title: 'Productos de la Comuna 13 · Florece 13', url: '/buscar', images: [SITE_OG_IMAGE] },
 }
 
 const PAGE_SIZE = 24

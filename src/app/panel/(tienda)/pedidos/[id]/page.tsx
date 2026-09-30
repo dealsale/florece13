@@ -9,7 +9,7 @@ import { requireMerchant } from '@/lib/auth'
 import { displayPhone, formatDate, formatPrice } from '@/lib/format'
 import { ORDER_STATUS_LABEL, ORDER_STATUSES } from '@/lib/orders'
 import { appUrl } from '@/lib/url'
-import { waLink } from '@/lib/whatsapp'
+import { merchantReply, waLink } from '@/lib/whatsapp'
 
 export const metadata: Metadata = { title: 'Pedido' }
 
@@ -23,11 +23,8 @@ export default async function PedidoPanelPage({ params }: { params: Promise<{ id
   })
   if (!order) notFound()
 
-  const first = order.customerName.split(' ')[0]
-  const replies = {
-    CONFIRMADO: `¡Hola, ${first}! Te habla ${store.name} desde Florece 13. Confirmamos tu pedido ${order.code} por ${formatPrice(order.total)}. Te cuento cómo quedamos con el pago y la entrega:`,
-    ENVIADO: `¡Hola, ${first}! Tu pedido ${order.code} de ${store.name} ya va en camino. Podés ver el estado aquí: ${appUrl(`/pedido/${order.id}`)}`,
-  }
+  const replyData = { customerName: order.customerName, code: order.code, total: order.total, storeName: store.name, orderUrl: appUrl(`/pedido/${order.id}`) }
+  const replies = { CONFIRMADO: merchantReply('CONFIRMADO', replyData), ENVIADO: merchantReply('ENVIADO', replyData) }
 
   return (
     <div className="stack" style={{ ['--gap' as string]: '20px' }}>

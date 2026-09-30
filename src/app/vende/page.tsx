@@ -1,3 +1,4 @@
+import { SITE_OG_IMAGE } from '@/lib/seo'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Icon } from '@/components/Icon'
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   title: 'Vendé en Florece 13',
   description: 'Abrí tu tienda de la Comuna 13 en línea y recibí pedidos de todo el país directo en tu WhatsApp. Sin mensualidad para empezar.',
   alternates: { canonical: '/vende' },
-  openGraph: { title: 'Tu negocio florece aquí · Vendé en Florece 13', url: '/vende' },
+  openGraph: { title: 'Tu negocio florece aquí · Vendé en Florece 13', url: '/vende', images: [SITE_OG_IMAGE] },
 }
 
 const HERO_STAIRS = stairs('rgba(255,255,255,.14)', 7, 520, 320)
