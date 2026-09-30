@@ -8,6 +8,7 @@ import { setOrderStatus } from '@/lib/actions/merchant'
 import { requireMerchant } from '@/lib/auth'
 import { displayPhone, formatDate, formatPrice } from '@/lib/format'
 import { ORDER_STATUS_LABEL, ORDER_STATUSES } from '@/lib/orders'
+import { isMobileRequest } from '@/lib/device'
 import { appUrl } from '@/lib/url'
 import { merchantReply, waLink } from '@/lib/whatsapp'
 
@@ -24,7 +25,8 @@ export default async function PedidoPanelPage({ params }: { params: Promise<{ id
   if (!order) notFound()
 
   const replyData = { customerName: order.customerName, code: order.code, total: order.total, storeName: store.name, orderUrl: appUrl(`/pedido/${order.id}`) }
-  const replies = { CONFIRMADO: merchantReply('CONFIRMADO', replyData), ENVIADO: merchantReply('ENVIADO', replyData) }
+  const rich = await isMobileRequest()
+  const replies = { CONFIRMADO: merchantReply('CONFIRMADO', replyData, rich), ENVIADO: merchantReply('ENVIADO', replyData, rich) }
 
   return (
     <div className="stack" style={{ ['--gap' as string]: '20px' }}>

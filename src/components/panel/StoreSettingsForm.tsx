@@ -55,7 +55,7 @@ export function StoreSettingsForm({
         </label>
       </div>
       {state?.message && <div className={`note ${state.ok ? "note-ok" : "note-err"}`} role="status">{state.message}</div>}
-      <button type="submit" className="btn btn-primary btn-lg" disabled={pending} style={{ alignSelf: 'flex-start' }}>{pending ? 'Guardando…' : 'Guardar cambios'}</button>
+      <button type="submit" className="btn btn-primary btn-lg" disabled={pending} style={{ alignSelf: 'flex-start' }} data-tour="t-guardar">{pending ? 'Guardando…' : 'Guardar cambios'}</button>
     </form>
   )
 }

@@ -1,16 +1,15 @@
 import Link from 'next/link'
-import { storeCover } from '@/lib/art'
+import { artSrc } from '@/lib/art'
 import type { StoreCardData } from '@/lib/queries'
 import { Avatar } from './Avatar'
 import { Icon } from './Icon'
-import { Svg } from './Svg'
 
 export function StoreCard({ store: s, i = 0 }: { store: StoreCardData; i?: number }) {
   return (
     <Link href={`/t/${s.slug}`} className="store rise" style={{ ['--i' as string]: i }}>
       <div className="store__cover">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {s.coverUrl ? <img src={s.coverUrl} alt="" loading="lazy" /> : <Svg html={storeCover(s.id, s.categorySlug)} />}
+        <img src={s.coverUrl ?? artSrc('tienda', s.id, s.categorySlug)} alt="" loading="lazy" decoding="async" />
       </div>
       <div className="store__body">
         <div className="store__av"><Avatar name={s.name} src={s.logoUrl} categorySlug={s.categorySlug} /></div>

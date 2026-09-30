@@ -126,7 +126,7 @@ main { min-height: 70vh; padding-bottom: 120px; }
 /* ---------- animación de entrada ---------- */
 .page { animation: page-in .45s var(--ease) both; }
 @keyframes page-in { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: none } }
-.rise { animation: rise .6s var(--ease) both; animation-delay: calc(var(--i, 0) * 60ms + 80ms); }
+.rise { animation: rise .6s var(--ease) backwards; animation-delay: calc(var(--i, 0) * 60ms + 80ms); }
 @keyframes rise { from { opacity: 0; transform: translateY(18px) } to { opacity: 1; transform: none } }
 
 /* ---------- hero ---------- */
@@ -499,3 +499,57 @@ a.lrow:hover { transform: translateX(3px); }
 .inst-step__ic { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; background: var(--arena); color: #0A7AFF; }
 .inst-note { font-size: 13px; color: var(--tinta-3); margin: 0 0 14px; }
 .linkish { border: 0; padding: 0; background: none; font: inherit; color: var(--verde); font-weight: 700; text-decoration: underline; cursor: pointer; }
+
+/* ---------- tarjetas del resumen (tocables) ---------- */
+a.kpi { color: inherit; transition: transform .25s var(--spring), box-shadow .25s; }
+a.kpi:hover { transform: translateY(-2px); box-shadow: var(--sh-1); }
+a.kpi:active { transform: scale(.96); }
+.kpi__go { position: absolute; top: 14px; right: 14px; color: var(--ink, var(--cemento)); opacity: .7; transition: transform .25s var(--spring); }
+a.kpi:hover .kpi__go { transform: translateX(3px); }
+
+/* ---------- sensación de app nativa ---------- */
+html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; }
+a, button, label, summary, [role="button"], [role="switch"], input[type="checkbox"], select { touch-action: manipulation; }
+/* Sin selección de texto ni menú de "copiar/abrir" al mantener presionado en la interfaz (sí en textos y formularios). */
+.top, .tabs, .pnav, .btn, .chip, .kpi, .prod, .store, .lrow, .cat, .icon-btn, .switch, .up, .inst, .sheet .inst-step, .todo, .foot__g a {
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+img, svg { -webkit-user-drag: none; }
+:focus:not(:focus-visible) { outline: none; }
+/* Respuesta al toque: un leve "hundido", como en las apps. */
+@media (hover: none) {
+  .prod:active, .store:active, .lrow:active, .cat:active, .todo a:active, .icon-btn:active, .tabs a:active { transform: scale(.97); transition: transform .12s; }
+  .btn:active { transform: scale(.96); }
+}
+.sk { display: block; }
+
+/* ---------- recorrido guiado ---------- */
+.tour { position: fixed; inset: 0; z-index: 300; pointer-events: none; }
+.tour__dim { position: fixed; inset: 0; background: rgba(20, 18, 16, .62); pointer-events: auto; animation: fade-in .3s both; }
+.tour__hole { position: fixed; border-radius: 18px; box-shadow: 0 0 0 9999px rgba(20, 18, 16, .62), 0 0 0 3px var(--florece), 0 0 24px 6px rgba(46, 204, 113, .45); transition: top .35s var(--ease), left .35s var(--ease), width .35s var(--ease), height .35s var(--ease); animation: tour-glow 1.8s ease-in-out infinite; pointer-events: none; }
+@keyframes tour-glow { 50% { box-shadow: 0 0 0 9999px rgba(20, 18, 16, .62), 0 0 0 3px var(--florece), 0 0 34px 12px rgba(46, 204, 113, .6); } }
+.tour__block { position: fixed; pointer-events: auto; }
+.tour__card { position: fixed; pointer-events: auto; padding: 16px 18px 14px; border-radius: 22px; background: var(--papel); color: var(--cemento); box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .55); transition: top .35s var(--ease), left .35s var(--ease), background .3s; animation: tour-in .45s var(--spring) both; -webkit-user-select: none; user-select: none; }
+.tour__card.ok { background: #E9F9EF; }
+@keyframes tour-in { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
+.tour__arrow { position: absolute; width: 16px; height: 16px; background: inherit; transform: translateX(-50%) rotate(45deg); border-radius: 3px; }
+.tour__arrow.up { top: -7px; }
+.tour__arrow.down { bottom: -7px; }
+.tour__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.tour__n { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--fucsia-t); }
+.tour__x { width: 30px; height: 30px; display: grid; place-items: center; border: 0; border-radius: 50%; background: var(--arena); color: var(--tinta-2); cursor: pointer; }
+.tour__card h2 { font-family: var(--f-display); font-size: 20px; line-height: 1.15; margin: 2px 0 6px; }
+.tour__card p { margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--tinta-2); }
+.tour__dots { display: flex; gap: 4px; margin: 12px 0 10px; }
+.tour__dots i { flex: 1; height: 4px; border-radius: 4px; background: var(--linea); }
+.tour__dots i.d { background: var(--florece); }
+.tour__dots i.c { background: var(--fucsia); }
+.tour__act { display: flex; align-items: center; justify-content: flex-end; gap: 8px; min-height: 40px; }
+.tour__hint { margin-right: auto; display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; color: var(--tinta-2); }
+.tour__hint.ok { color: var(--verde); }
+.tour__pulse { width: 10px; height: 10px; border-radius: 50%; background: var(--naranja); animation: tour-pulse 1.2s ease-in-out infinite; }
+@keyframes tour-pulse { 50% { transform: scale(1.6); opacity: .4; } }
+.tour-pill { position: fixed; z-index: 300; left: 50%; transform: translateX(-50%); bottom: calc(96px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 6px; padding: 6px; border-radius: 999px; background: var(--cemento); box-shadow: var(--sh-2); animation: tour-in .4s var(--spring) both; }
+@media (min-width: 900px) { .tour-pill { bottom: 24px; } }
+.tour-pill__x { width: 32px; height: 32px; display: grid; place-items: center; border: 0; border-radius: 50%; background: rgba(247, 243, 238, .12); color: var(--hueso); cursor: pointer; }
+.touring .inst { display: none; }

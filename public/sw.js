@@ -4,7 +4,7 @@
  * - Páginas: siempre de la red (precios, stock y sesión deben estar al día);
  *   sin conexión se muestra /offline.
  */
-const VERSION = 'f13-v2'
+const VERSION = 'f13-v3'
 const STATIC = `${VERSION}-static`
 const MEDIA = `${VERSION}-media`
 const OFFLINE = '/offline'
@@ -45,7 +45,7 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  if (url.pathname.startsWith('/_next/static/') || /\.(woff2?|ttf)$/.test(url.pathname) || url.pathname.startsWith('/icons/') || url.pathname.startsWith('/brand/')) {
+  if (url.pathname.startsWith('/_next/static/') || /\.(woff2?|ttf)$/.test(url.pathname) || url.pathname.startsWith('/icons/') || url.pathname.startsWith('/brand/') || url.pathname.startsWith('/art/')) {
     event.respondWith(
       caches.match(req).then(
         (hit) =>

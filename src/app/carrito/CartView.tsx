@@ -4,8 +4,7 @@ import Link from 'next/link'
 import { Avatar } from '@/components/Avatar'
 import { EmptyState } from '@/components/EmptyState'
 import { Icon } from '@/components/Icon'
-import { Svg } from '@/components/Svg'
-import { productArt } from '@/lib/art'
+import { artSrc } from '@/lib/art'
 import { formatPrice } from '@/lib/format'
 import { useCartProducts, type CartLine } from './useCartProducts'
 
@@ -44,7 +43,7 @@ export function CartView() {
               <div key={l.productId} className="cl">
                 <Link href={`/p/${l.productId}`} className="cl__img">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  {l.product.imageUrl ? <img src={l.product.imageUrl} alt="" /> : <Svg html={productArt(l.productId, l.product.categorySlug)} />}
+                  <img src={l.product.imageUrl ?? artSrc('producto', l.productId, l.product.categorySlug)} alt="" />
                 </Link>
                 <div className="stack" style={{ ['--gap' as string]: '8px' }}>
                   <div className="row" style={{ alignItems: 'flex-start', flexWrap: 'nowrap' }}>

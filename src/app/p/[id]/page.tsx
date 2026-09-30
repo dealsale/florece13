@@ -9,10 +9,11 @@ import { Price } from '@/components/Price'
 import { ProductCard } from '@/components/ProductCard'
 import { JsonLd } from '@/components/JsonLd'
 import { ShareButton } from '@/components/ShareButton'
-import { productArt } from '@/lib/art'
+import { artSrc } from '@/lib/art'
 import { getCurrentUser } from '@/lib/auth'
 import { formatPrice } from '@/lib/format'
 import { getProduct, listProducts } from '@/lib/queries'
+import { isMobileRequest } from '@/lib/device'
 import { appUrl } from '@/lib/url'
 import { productMessage, waLink } from '@/lib/whatsapp'
 
@@ -41,7 +42,7 @@ export default async function ProductPage({ params }: { params: Params }) {
   if (store.status !== 'ACTIVE' && !isOwner && user?.role !== 'ADMIN') notFound()
 
   const url = appUrl(`/p/${product.id}`)
-  const wa = waLink(store.whatsapp, productMessage(product.name, product.price, url))
+  const wa = waLink(store.whatsapp, productMessage(product.name, product.price, url, await isMobileRequest()))
   const more = (await listProducts({ storeId: store.id, limit: 5 })).filter((p) => p.id !== product.id).slice(0, 4)
 
   const abs = (u: string) => (u.startsWith('/') ? appUrl(u) : u)
@@ -72,7 +73,7 @@ export default async function ProductPage({ params }: { params: Params }) {
 
       <div className="p-layout">
         <div className="rise">
-          <Gallery images={product.images.map((i) => i.url)} alt={product.name} fallbackSvg={productArt(product.id, product.category?.slug)} />
+          <Gallery images={product.images.map((i) => i.url)} alt={product.name} fallbackSrc={artSrc('producto', product.id, product.category?.slug)} />
         </div>
 
         <div className="p-info rise" style={{ ['--i' as string]: 1 }}>

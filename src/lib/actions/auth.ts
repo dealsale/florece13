@@ -1,6 +1,7 @@
 'use server'
 
 import { eq } from 'drizzle-orm'
+import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { db, users } from '@/db'
@@ -40,6 +41,8 @@ export async function register(_prev: AuthState, formData: FormData): Promise<Au
     .values({ name, email, passwordHash: await hashPassword(password), role: isAdminEmail(email) ? 'ADMIN' : 'MERCHANT' })
     .returning()
   await createSession(user.id)
+  // La sesión cambió: descartar las páginas que el navegador tenga guardadas.
+  revalidatePath('/', 'layout')
   redirect(user.role === 'ADMIN' ? '/admin' : '/panel/crear-tienda')
 }
 
@@ -55,10 +58,14 @@ export async function login(_prev: AuthState, formData: FormData): Promise<AuthS
     await db.update(users).set({ role: 'ADMIN' }).where(eq(users.id, user.id))
   }
   await createSession(user.id)
+  // La sesión cambió: descartar las páginas que el navegador tenga guardadas.
+  revalidatePath('/', 'layout')
   redirect(safeNext(formData.get('next'), user.role === 'ADMIN' || isAdminEmail(user.email) ? '/admin' : '/panel'))
 }
 
 export async function logout() {
   await destroySession()
+  // La sesión cambió: descartar las páginas que el navegador tenga guardadas.
+  revalidatePath('/', 'layout')
   redirect('/')
 }

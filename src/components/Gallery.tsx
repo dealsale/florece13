@@ -1,15 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Svg } from './Svg'
 
-export function Gallery({ images, alt, fallbackSvg }: { images: string[]; alt: string; fallbackSvg: string }) {
+export function Gallery({ images, alt, fallbackSrc }: { images: string[]; alt: string; fallbackSrc: string }) {
   const [current, setCurrent] = useState(0)
   return (
     <div>
       <div className="gal__main">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {images.length ? <img key={current} src={images[current]} alt={alt} /> : <Svg html={fallbackSvg} />}
+        <img key={current} src={images.length ? images[current] : fallbackSrc} alt={alt} />
       </div>
       {images.length > 1 && (
         <div className="gal__thumbs">

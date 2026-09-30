@@ -73,6 +73,7 @@ export async function createStore(_prev: FormState, fd: FormData): Promise<FormS
   if (!(await categoryExists(parsed.data.categoryId))) return { errors: { categoryId: ['Elegí una categoría.'] } }
 
   await db.insert(stores).values({ ...parsed.data, ownerId: user.id, slug: await uniqueSlug(parsed.data.name) })
+  revalidatePath('/', 'layout')
   redirect('/panel?bienvenida=1')
 }
 

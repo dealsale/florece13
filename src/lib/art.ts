@@ -185,3 +185,9 @@ export function productArt(seed: string, categorySlug?: string | null) {
     spray += `<circle cx="${(r() * 400).toFixed(0)}" cy="${(r() * 500).toFixed(0)}" r="${(r() * 3 + 0.6).toFixed(1)}" fill="#1F1D1B" opacity=".18"/>`
   return `<svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="400" height="500" fill="${bg}"/>${m}${spray}</svg>`
 }
+
+/** URL de la ilustración como imagen cacheable (ver app/art/[kind]/[seed]/route.ts). Subí ART_VERSION si cambia el dibujo. */
+const ART_VERSION = 1
+export function artSrc(kind: 'producto' | 'tienda', seed: string, categorySlug?: string | null) {
+  return `/art/${kind}/${seed}.svg?v=${ART_VERSION}${categorySlug ? `&c=${categorySlug}` : ''}`
+}

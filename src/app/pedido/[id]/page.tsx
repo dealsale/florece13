@@ -8,6 +8,7 @@ import { Svg } from '@/components/Svg'
 import { flower } from '@/lib/art'
 import { formatDate, formatPrice } from '@/lib/format'
 import { ORDER_STATUS_LABEL } from '@/lib/orders'
+import { isMobileRequest } from '@/lib/device'
 import { appUrl } from '@/lib/url'
 import { orderMessage, waLink } from '@/lib/whatsapp'
 
@@ -50,7 +51,7 @@ export default async function PedidoPage({ params, searchParams }: { params: Pro
   if (!order) notFound()
 
   const url = appUrl(`/pedido/${order.id}`)
-  const wa = waLink(order.store.whatsapp, orderMessage(order, order.store.name, url))
+  const wa = waLink(order.store.whatsapp, orderMessage(order, order.store.name, url, await isMobileRequest()))
 
   return (
     <div className="wrap" style={{ maxWidth: 720 }}>

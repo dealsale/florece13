@@ -7,10 +7,10 @@ import { JsonLd } from '@/components/JsonLd'
 import { Icon } from '@/components/Icon'
 import { ProductCard } from '@/components/ProductCard'
 import { ShareButton } from '@/components/ShareButton'
-import { Svg } from '@/components/Svg'
-import { CATEGORY_COLORS, storeCover } from '@/lib/art'
+import { artSrc, CATEGORY_COLORS } from '@/lib/art'
 import { getCurrentUser } from '@/lib/auth'
 import { getStoreBySlug, listProducts } from '@/lib/queries'
+import { isMobileRequest } from '@/lib/device'
 import { appUrl } from '@/lib/url'
 import { storeGreeting, waLink } from '@/lib/whatsapp'
 
@@ -37,6 +37,7 @@ export default async function StorePage({ params }: { params: Params }) {
   if (!store) notFound()
   const isOwner = user?.id === store.ownerId
   if (store.status !== 'ACTIVE' && !isOwner && user?.role !== 'ADMIN') notFound()
+  const rich = await isMobileRequest()
   const preview = store.status !== 'ACTIVE'
   const products = await listProducts({ storeId: store.id, limit: 200, includeUnavailable: true, includeInactiveStore: preview })
   const cat = store.category
@@ -72,7 +73,7 @@ export default async function StorePage({ params }: { params: Params }) {
       )}
       <div className="s-cover">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {store.coverUrl ? <img src={store.coverUrl} alt="" /> : <Svg html={storeCover(store.id, cat?.slug)} />}
+        <img src={store.coverUrl ?? artSrc('tienda', store.id, cat?.slug)} alt="" fetchPriority="high" />
       </div>
       <div className="wrap">
         <div className="s-head rise">
@@ -87,7 +88,7 @@ export default async function StorePage({ params }: { params: Params }) {
             {store.shipsNationwide && <span className="chip"><Icon name="envio" size={14} /> Envíos a todo el país</span>}
           </div>
           <div className="s-actions">
-            <a className="btn btn-wa" href={waLink(store.whatsapp, storeGreeting(store.name, appUrl(`/t/${store.slug}`)))} target="_blank" rel="noopener noreferrer">
+            <a className="btn btn-wa" href={waLink(store.whatsapp, storeGreeting(store.name, appUrl(`/t/${store.slug}`), rich))} target="_blank" rel="noopener noreferrer">
               <Icon name="whatsapp" size={20} /> Escribir por WhatsApp
             </a>
             {store.instagram && (

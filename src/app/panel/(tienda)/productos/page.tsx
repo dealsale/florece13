@@ -30,7 +30,7 @@ export default async function ProductosPage({ searchParams }: { searchParams: Pr
     <div>
       <div className="phead">
         <h1 className="h1">Productos</h1>
-        <Link href="/panel/productos/nuevo" className="btn btn-primary"><Icon name="mas" size={18} /> Nuevo</Link>
+        <Link href="/panel/productos/nuevo" className="btn btn-primary" data-tour="p-nuevo"><Icon name="mas" size={18} /> Nuevo</Link>
       </div>
       {creado && <div className="note note-ok" style={{ marginBottom: 16 }}>¡Producto publicado!</div>}
       {rows.length === 0 ? (

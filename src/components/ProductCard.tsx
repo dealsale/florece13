@@ -1,9 +1,8 @@
 import Link from 'next/link'
-import { CATEGORY_COLORS, productArt } from '@/lib/art'
+import { artSrc, CATEGORY_COLORS } from '@/lib/art'
 import type { ProductCardData } from '@/lib/queries'
 import { Price } from './Price'
 import { QuickAdd } from './QuickAdd'
-import { Svg } from './Svg'
 
 export function ProductCard({ product: p, showStore = true, i = 0 }: { product: ProductCardData; showStore?: boolean; i?: number }) {
   return (
@@ -11,7 +10,7 @@ export function ProductCard({ product: p, showStore = true, i = 0 }: { product: 
       <div className="prod__img">
         <Link href={`/p/${p.id}`} aria-label={p.name} style={{ display: 'block', height: '100%' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          {p.imageUrl ? <img src={p.imageUrl} alt="" loading="lazy" /> : <Svg html={productArt(p.id, p.categorySlug)} />}
+          <img src={p.imageUrl ?? artSrc('producto', p.id, p.categorySlug)} alt="" loading="lazy" decoding="async" />
         </Link>
         {!p.isAvailable && <span className="chip chip-dark">Agotado</span>}
         {p.isAvailable && <QuickAdd productId={p.id} storeId={p.storeId} name={p.name} />}

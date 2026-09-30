@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { db, orders, products } from '@/db'
 import { EmptyState } from '@/components/EmptyState'
 import { Icon } from '@/components/Icon'
+import { TourButton } from '@/components/panel/TourButton'
 import { requireMerchant } from '@/lib/auth'
 import { formatDate, formatPrice } from '@/lib/format'
 import { ORDER_STATUS_LABEL } from '@/lib/orders'
@@ -36,10 +37,10 @@ export default async function PanelPage({ searchParams }: { searchParams: Promis
   ]
   const doneN = todo.filter((t) => t.done).length
   const kpis = [
-    { v: nuevos.n, l: 'Pedidos nuevos', c: 'var(--tint-naranja)', ink: 'var(--naranja)' },
-    { v: mes.n, l: 'Pedidos del mes', c: 'var(--tint-turquesa)', ink: 'var(--turquesa)' },
-    { v: formatPrice(mes.sum), l: 'Vendido este mes', c: 'var(--tint-verde)', ink: 'var(--verde)' },
-    { v: prod.total, l: 'Productos', c: 'var(--tint-fucsia)', ink: 'var(--fucsia)' },
+    { v: nuevos.n, l: 'Pedidos nuevos', c: 'var(--tint-naranja)', ink: 'var(--naranja)', href: '/panel/pedidos?estado=NUEVO' },
+    { v: mes.n, l: 'Pedidos del mes', c: 'var(--tint-turquesa)', ink: 'var(--turquesa)', href: '/panel/pedidos' },
+    { v: formatPrice(mes.sum), l: 'Vendido este mes', c: 'var(--tint-verde)', ink: 'var(--verde)', href: '/panel/pedidos?estado=ENTREGADO' },
+    { v: prod.total, l: 'Productos', c: 'var(--tint-fucsia)', ink: 'var(--fucsia)', href: '/panel/productos' },
   ]
 
   return (
@@ -49,7 +50,7 @@ export default async function PanelPage({ searchParams }: { searchParams: Promis
           <span className="tag" style={{ color: 'var(--fucsia-t)', fontSize: 20 }}>{store.name}</span>
           <h1 className="h1">{bienvenida ? '¡Bienvenido a Florece 13!' : `Hola, ${user.name.split(' ')[0]}`}</h1>
         </div>
-        <Link href="/panel/productos/nuevo" className="btn btn-primary"><Icon name="mas" size={18} /> Publicar producto</Link>
+        <Link href="/panel/productos/nuevo" className="btn btn-primary" data-tour="publicar"><Icon name="mas" size={18} /> Publicar producto</Link>
       </div>
 
       {store.status === 'PENDING' && (
@@ -60,22 +61,24 @@ export default async function PanelPage({ searchParams }: { searchParams: Promis
       )}
       {store.status === 'SUSPENDED' && <div className="note note-err">Tu tienda está suspendida y no aparece al público. Escribinos para revisarlo.</div>}
 
-      <div className="kpis">
+      <div className="kpis" data-tour="kpis">
         {kpis.map((k, i) => (
-          <div key={k.l} className="kpi rise" style={{ ['--i' as string]: i, ['--c' as string]: k.c, ['--ink' as string]: k.ink }}>
+          <Link key={k.l} href={k.href} className="kpi rise" style={{ ['--i' as string]: i, ['--c' as string]: k.c, ['--ink' as string]: k.ink }}>
             <b style={String(k.v).length > 7 ? { fontSize: 24 } : undefined}>{k.v}</b>
             <span>{k.l}</span>
-          </div>
+            <Icon name="flecha" size={16} className="kpi__go" />
+          </Link>
         ))}
       </div>
 
       {doneN < todo.length && (
-        <section className="card pad stack rise" style={{ ['--gap' as string]: '14px' }}>
+        <section className="card pad stack rise" style={{ ['--gap' as string]: '14px' }} data-tour="checklist">
           <div className="row" style={{ justifyContent: 'space-between' }}>
             <h2 className="h3">Hacé florecer tu tienda</h2>
             <span className="small muted">{doneN} de {todo.length}</span>
           </div>
           <div className="prog"><i style={{ width: `${(doneN / todo.length) * 100}%` }} /></div>
+          <TourButton label={doneN === 0 ? 'Empezar el recorrido guiado' : 'Seguir con el recorrido guiado'} />
           <ul className="todo">
             {todo.map((t) => (
               <li key={t.label} className={t.done ? 'ok' : undefined}>
