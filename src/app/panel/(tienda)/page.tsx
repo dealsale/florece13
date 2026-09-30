@@ -5,6 +5,7 @@ import { db, orders, products } from '@/db'
 import { EmptyState } from '@/components/EmptyState'
 import { Icon } from '@/components/Icon'
 import { TourButton } from '@/components/panel/TourButton'
+import { PushPrompt } from '@/components/panel/PushToggle'
 import { requireMerchant } from '@/lib/auth'
 import { formatDate, formatPrice } from '@/lib/format'
 import { ORDER_STATUS_LABEL } from '@/lib/orders'
@@ -60,6 +61,8 @@ export default async function PanelPage({ searchParams }: { searchParams: Promis
         </div>
       )}
       {store.status === 'SUSPENDED' && <div className="note note-err">Tu tienda está suspendida y no aparece al público. Escribinos para revisarlo.</div>}
+
+      <PushPrompt />
 
       <div className="kpis" data-tour="kpis">
         {kpis.map((k, i) => (

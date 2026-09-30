@@ -189,6 +189,16 @@ await icon(512, 0.1, `${ICONS}/icon-512.png`)
 await icon(192, 0.1, `${ICONS}/icon-192.png`)
 await icon(512, 0.2, `${ICONS}/maskable-512.png`)
 await icon(180, 0.12, `${ICONS}/apple-touch-icon.png`)
+
+// Ícono de la barra de estado de Android para las notificaciones: silueta blanca del 13 (solo cuenta el alfa).
+{
+  const alpha = await sharp(markPng).resize({ width: 80, height: 80, fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).extractChannel('alpha').toBuffer()
+  const white = await sharp({ create: { width: 80, height: 80, channels: 3, background: '#FFFFFF' } }).joinChannel(alpha).png().toBuffer()
+  await sharp({ create: { width: 96, height: 96, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .composite([{ input: white, left: 8, top: 8 }])
+    .png()
+    .toFile(`${ICONS}/badge-96.png`)
+}
 await icon(48, 0.04, `${ICONS}/favicon-48.png`)
 await icon(32, 0.02, `${ICONS}/favicon-32.png`)
 

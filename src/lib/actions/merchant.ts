@@ -2,6 +2,8 @@
 
 import { and, eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
+import { after } from 'next/server'
+import { notifyNewStore, safeNotify } from '@/lib/notify'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { categories, db, orders, productImages, products, stores } from '@/db'
@@ -72,7 +74,8 @@ export async function createStore(_prev: FormState, fd: FormData): Promise<FormS
   if (!parsed.success) return { errors: z.flattenError(parsed.error).fieldErrors }
   if (!(await categoryExists(parsed.data.categoryId))) return { errors: { categoryId: ['Elegí una categoría.'] } }
 
-  await db.insert(stores).values({ ...parsed.data, ownerId: user.id, slug: await uniqueSlug(parsed.data.name) })
+  const [created] = await db.insert(stores).values({ ...parsed.data, ownerId: user.id, slug: await uniqueSlug(parsed.data.name) }).returning({ id: stores.id })
+  after(() => safeNotify(() => notifyNewStore(created.id)))
   revalidatePath('/', 'layout')
   redirect('/panel?bienvenida=1')
 }

@@ -1,5 +1,7 @@
 'use server'
 
+import { after } from 'next/server'
+import { notifyNewOrder, safeNotify } from '@/lib/notify'
 import { randomInt } from 'node:crypto'
 import { and, count, eq, gt, inArray } from 'drizzle-orm'
 import { z } from 'zod'
@@ -146,6 +148,8 @@ export async function createOrder(_prev: OrderState, formData: FormData): Promis
         )
         return order.id
       })
+      // Aviso a la tienda (bandeja + push) después de responder: no demora ni tumba el pedido.
+      after(() => safeNotify(() => notifyNewOrder(orderId)))
       return { ok: true, orderId }
     } catch (err) {
       // Choque de código único: reintentar con otro.

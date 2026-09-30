@@ -3,12 +3,15 @@
 import { randomInt } from 'node:crypto'
 import { eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
+import { after } from 'next/server'
+import { notifyStoreStatus, safeNotify } from '@/lib/notify'
 import { db, sessions, stores, users } from '@/db'
 import { hashPassword, requireAdmin } from '@/lib/auth'
 
 export async function setStoreStatus(storeId: string, status: 'ACTIVE' | 'SUSPENDED' | 'PENDING') {
   await requireAdmin()
   await db.update(stores).set({ status }).where(eq(stores.id, storeId))
+  after(() => safeNotify(() => notifyStoreStatus(storeId, status)))
   revalidatePath('/', 'layout')
 }
 

@@ -5,6 +5,7 @@ import { categories, db, orders, products, stores, users } from '@/db'
 import { Avatar } from '@/components/Avatar'
 import { EmptyState } from '@/components/EmptyState'
 import { ResetPasswordButton } from '@/components/ResetPasswordButton'
+import { PushSettings } from '@/components/panel/PushToggle'
 import { logout } from '@/lib/actions/auth'
 import { setStoreStatus } from '@/lib/actions/admin'
 import { requireAdmin } from '@/lib/auth'
@@ -56,6 +57,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           <h1 className="h1">Administración</h1>
         </div>
         <form action={logout}><button className="btn btn-ghost">Salir</button></form>
+      </div>
+
+      <div style={{ marginBottom: 18 }}>
+        <PushSettings />
       </div>
 
       <div className="kpis" style={{ marginBottom: 22 }}>

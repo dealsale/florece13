@@ -22,6 +22,10 @@ La vitrina digital de los comercios de la Comuna 13 de Medellín. Cada tienda de
 - Mi tienda: logo, portada, historia, dirección, forma de entrega (envío nacional y/o recoger).
 - QR y sticker "Florece aquí" para imprimir o descargar.
 
+**Notificaciones** (`/panel/avisos`):
+- Cada pedido nuevo le llega a la tienda como notificación push (aunque tenga la app cerrada) y queda en la bandeja de Avisos. También avisa cuando la tienda se aprueba o se suspende, y al admin cuando hay una tienda nueva para revisar.
+- Se activan por dispositivo desde el resumen o desde Avisos (con botón de prueba). En iPhone, Apple solo permite push con la app instalada en la pantalla de inicio (iOS 16.4+); el panel lo explica y ofrece instalarla.
+
 **Administración** (`/admin`):
 - Las tiendas nuevas quedan **en revisión** y no son públicas hasta que un admin las aprueba (para confirmar que son de la Comuna 13). También se pueden suspender. Si un comerciante olvida la clave, el admin le genera una temporal ("Nueva clave").
 - La cuenta de administración se crea sola en cada despliegue con el primer correo de `ADMIN_EMAILS` y la clave de `ADMIN_PASSWORD`. Si cambiás la variable, la clave se actualiza en el siguiente despliegue y se cierran las sesiones abiertas de esa cuenta. Sin `ADMIN_PASSWORD`, quien se registre con un correo de `ADMIN_EMAILS` queda como administrador.
@@ -64,6 +68,7 @@ Primer uso: registrate en `/registro` con un correo de `ADMIN_EMAILS` para tener
 | `UPLOAD_DIR` | Carpeta de fotos con `local` (por defecto `./uploads`; en Railway `/data/uploads`) |
 | `S3_BUCKET`, `S3_REGION`, `S3_ENDPOINT`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Credenciales del bucket (solo con `s3`) |
 | `S3_PUBLIC_URL` | URL pública del bucket, sin `/` al final |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Opcionales. Claves de las notificaciones push; si no están, se generan solas la primera vez y se guardan en la base (`app_settings`) |
 
 ## Publicar en Railway
 

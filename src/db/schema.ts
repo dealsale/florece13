@@ -192,6 +192,48 @@ export const storesRelations = relations(stores, ({ one, many }) => ({
   orders: many(orders),
 }))
 
+/** Suscripciones de notificaciones push: una por navegador/celular donde el usuario las activó. */
+export const pushSubscriptions = pgTable(
+  'push_subscriptions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    endpoint: text('endpoint').notNull(),
+    p256dh: text('p256dh').notNull(),
+    auth: text('auth').notNull(),
+    userAgent: text('user_agent').notNull().default(''),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('push_subscriptions_endpoint_idx').on(t.endpoint), index('push_subscriptions_user_idx').on(t.userId)],
+)
+
+/** Bandeja de avisos del panel (lo mismo que llega por push queda guardado aquí). */
+export const notifications = pgTable(
+  'notifications',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    kind: text('kind').notNull(),
+    title: text('title').notNull(),
+    body: text('body').notNull().default(''),
+    url: text('url').notNull().default('/panel'),
+    readAt: timestamp('read_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('notifications_user_idx').on(t.userId, t.createdAt)],
+)
+
+/** Ajustes internos de la app (p. ej. las claves VAPID de las notificaciones push). */
+export const appSettings = pgTable('app_settings', {
+  key: text('key').primaryKey(),
+  value: text('value').notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 export const productsRelations = relations(products, ({ one, many }) => ({
   store: one(stores, { fields: [products.storeId], references: [stores.id] }),
   category: one(categories, { fields: [products.categoryId], references: [categories.id] }),
@@ -219,3 +261,4 @@ export type Product = typeof products.$inferSelect
 export type ProductImage = typeof productImages.$inferSelect
 export type Order = typeof orders.$inferSelect
 export type OrderItem = typeof orderItems.$inferSelect
+export type Notification = typeof notifications.$inferSelect
