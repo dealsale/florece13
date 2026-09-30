@@ -27,6 +27,14 @@ export const metadata: Metadata = {
   title: { default: 'Florece 13 · Del barrio, para todo el país', template: '%s · Florece 13' },
   description: DESCRIPTION,
   applicationName: 'Florece 13',
+  icons: {
+    icon: [
+      { url: '/icons/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/favicon-48.png', sizes: '48x48', type: 'image/png' },
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: { url: '/icons/apple-touch-icon.png', sizes: '180x180' },
+  },
   keywords: ['Comuna 13', 'Medellín', 'artesanías', 'hecho a mano', 'tienda en línea', 'emprendedores', 'recuerdos de Medellín', 'streetwear', 'marketplace Colombia'],
   alternates: { canonical: '/' },
   appleWebApp: { capable: true, title: 'Florece 13', statusBarStyle: 'default', startupImage: splashStartupImages },

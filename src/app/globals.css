@@ -103,7 +103,8 @@ h1, h2, h3, p { margin: 0; }
 /* ---------- encabezado ---------- */
 .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; background: rgba(247, 243, 238, .82); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid rgba(230, 221, 209, .7); }
 .top__in { height: 64px; display: flex; align-items: center; gap: 18px; }
-.lockup { display: inline-flex; align-items: flex-end; line-height: 1; }
+.logo-img { display: block; max-width: none; }
+.top__in > a:first-child { flex-shrink: 0; display: block; }
 .top nav { display: none; gap: 2px; margin-left: 10px; }
 .top nav a { padding: 8px 14px; border-radius: 999px; font-weight: 600; font-size: 15px; transition: background .2s; }
 .top nav a:hover, .top nav a[aria-current] { background: rgba(31, 29, 27, .07); }

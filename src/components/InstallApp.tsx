@@ -147,7 +147,7 @@ export function InstallBanner() {
   return (
     <div className={`inst${leaving ? ' out' : ''}`} role="region" aria-label="Instalar la app">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/apple-icon" alt="" width={46} height={46} className="inst__ic" />
+      <img src="/icons/apple-touch-icon.png" alt="" width={46} height={46} className="inst__ic" />
       <div className="inst__t">
         <b>Tené Florece 13 en tu {device}</b>
         <span>A un toque, a pantalla completa y sin tienda de apps.</span>
@@ -178,7 +178,7 @@ export function InstallFooter() {
     <div className="inst-foot">
       <div className="inst-foot__art" aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/apple-icon" alt="" width={64} height={64} />
+        <img src="/icons/apple-touch-icon.png" alt="" width={64} height={64} />
       </div>
       <div className="inst-foot__t">
         <h2>Llevá Florece 13 en tu celular</h2>
@@ -247,7 +247,7 @@ function InstallGuide({ env, onClose }: { env: Env; onClose: () => void }) {
         </button>
         <div className="inst-head">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/apple-icon" alt="" width={56} height={56} />
+          <img src="/icons/apple-touch-icon.png" alt="" width={56} height={56} />
           <div>
             <span className="tag">¡a un toque!</span>
             <h2 id="inst-title">Instalá Florece 13 en tu {device}</h2>

@@ -39,7 +39,7 @@ export default async function HomePage() {
         '@type': 'Organization',
         name: 'Florece 13',
         url: appUrl('/'),
-        logo: appUrl('/icon'),
+        logo: appUrl('/brand/logo.png'),
         slogan: 'Tu negocio florece aquí.',
         areaServed: 'CO',
         description: 'Marketplace de los comercios de la Comuna 13 de Medellín.',

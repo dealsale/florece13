@@ -21,7 +21,7 @@ export default async function QrPage() {
 
       <div className="qr printable">
         <div className="row" style={{ justifyContent: 'center', ['--gap' as string]: '8px' }}>
-          <LogoMark size={36} />
+          <LogoMark size={44} />
           <span style={{ fontFamily: 'var(--font-display)', fontSize: 26 }}>Florece aquí</span>
         </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}

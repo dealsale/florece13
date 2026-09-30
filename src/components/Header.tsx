@@ -11,7 +11,7 @@ export async function Header() {
   return (
     <header className="top">
       <div className="wrap top__in">
-        <Link href="/" aria-label="Florece 13, inicio"><Logo height={30} /></Link>
+        <Link href="/" aria-label="Florece 13, inicio"><Logo height={42} /></Link>
         <HeaderNav admin={user?.role === 'ADMIN'} />
         <div className="top__act">
           <Link href="/buscar" className="icon-btn" aria-label="Buscar"><Icon name="buscar" /></Link>

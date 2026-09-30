@@ -34,7 +34,7 @@ La vitrina digital de los comercios de la Comuna 13 de Medellín. Cada tienda de
 - **PostgreSQL** con **Drizzle ORM** (migraciones SQL versionadas en `drizzle/`)
 - Sesiones propias: clave con bcrypt y cookie httpOnly; en la base se guarda solo el hash SHA-256 del token
 - Fotos: `sharp` + disco local o cualquier almacenamiento compatible con S3 (AWS S3, Cloudflare R2, DigitalOcean Spaces, MinIO)
-- Sistema visual "mural de la 13 + app moderna": Archivo Black + Archivo + Permanent Marker (servidas por la misma app), paleta de la marca con variantes AA, logo en la **ruta B, "El 13 que florece"** e ilustraciones generativas (ladera, escalera, arte por categoría) en `src/lib/art.ts` en lugar de fotos de stock
+- Sistema visual "mural de la 13 + app moderna": Archivo Black + Archivo + Permanent Marker (servidas por la misma app), paleta de la marca con variantes AA, logo ilustrado (el 13 con la loma, las casas y la flor) e ilustraciones generativas (ladera, escalera, arte por categoría) en `src/lib/art.ts` en lugar de fotos de stock
 
 ## Puesta en marcha
 
@@ -114,6 +114,10 @@ npm start
 
 - Sin disco persistente (Vercel, contenedores efímeros) usá `STORAGE_DRIVER=s3`: con `local` las fotos se pierden en cada despliegue.
 - El bucket debe permitir lectura pública de los objetos (o ponerle un CDN delante) y `S3_PUBLIC_URL` debe apuntar ahí.
+
+## Logo
+
+El arte original está en `brand/logo-original.jpg`. `node scripts/brand.mjs` le quita el fondo, separa el 13 de la palabra "Florece" y genera todo lo que usa la app: `public/brand/` (logo completo, lockup horizontal para el encabezado, versiones claras para fondos oscuros) y `public/icons/` + `public/favicon.ico` (íconos de la app, maskable para Android y apple-touch-icon). Si cambia el logo, reemplazá el original y volvé a correr el script.
 
 ## Estructura
 

@@ -1,39 +1,26 @@
-import { FLOWER, MARK_VIEWBOX as V, PETALS, THIRTEEN_PATH } from './logo-geometry'
+import { BRAND_RATIO } from './brand-assets'
 
-type MarkProps = { size?: number; tone?: 'dark' | 'light' | 'mono'; title?: string; bloom?: boolean }
+/* Logo de Florece 13 (arte en brand/logo-original.jpg; los archivos salen de scripts/brand.mjs). */
 
-/** Símbolo — Ruta B "El 13 que florece": la flor corona el 1. */
-export function LogoMark({ size = 40, tone = 'dark', title = 'Florece 13', bloom = false }: MarkProps) {
-  const ink = tone === 'light' ? '#F7F3EE' : '#1F1D1B'
+/** Símbolo: el 13 ilustrado (la loma, las casas y la flor). */
+export function LogoMark({ size = 40, title = 'Florece 13' }: { size?: number; title?: string }) {
   return (
-    <svg
-      width={(size * V.w) / V.h}
-      height={size}
-      viewBox={`${V.x} ${V.y} ${V.w} ${V.h}`}
-      role={title ? 'img' : undefined}
-      aria-label={title || undefined}
-      aria-hidden={title ? undefined : true}
-    >
-      <path d={THIRTEEN_PATH} fill={ink} />
-      <g transform={`translate(${FLOWER.cx},${FLOWER.cy})`} className={bloom ? 'bloom' : undefined}>
-        {PETALS.map((p, i) => (
-          <circle key={i} cx={p.dx} cy={p.dy} r={p.r} fill={tone === 'mono' ? (i === 3 ? '#F7F3EE' : ink) : p.color} />
-        ))}
-      </g>
-    </svg>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src="/brand/mark.webp" alt={title} width={Math.round(size * BRAND_RATIO.mark)} height={size} className="logo-img" />
   )
 }
 
-/** Lockup horizontal: "Florece" + símbolo. */
-export function Logo({ height = 30, tone = 'dark' }: { height?: number; tone?: 'dark' | 'light' }) {
-  const ink = tone === 'light' ? '#F7F3EE' : '#1F1D1B'
+/** Lockup horizontal: el 13 + "Florece". `light` para fondos oscuros. */
+export function Logo({ height = 40, tone = 'dark' }: { height?: number; tone?: 'dark' | 'light' }) {
   return (
-    <span className="lockup" style={{ gap: height * 0.1 }}>
-      <span style={{ fontFamily: 'var(--f-display)', fontSize: height * 0.62, letterSpacing: '-0.02em', color: ink, paddingBottom: height * 0.03 }}>
-        Florece
-      </span>
-      <LogoMark size={height} tone={tone} title="" />
-      <span className="vh">Florece 13</span>
-    </span>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={tone === 'light' ? '/brand/lockup-light.webp' : '/brand/lockup.webp'}
+      alt="Florece 13"
+      width={Math.round(height * BRAND_RATIO.lockup)}
+      height={height}
+      className="logo-img"
+      fetchPriority="high"
+    />
   )
 }

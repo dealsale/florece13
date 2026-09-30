@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { ImageResponse } from 'next/og'
 import sharp from 'sharp'
-import { MARK_VIEWBOX as V, FLOWER, PETALS, THIRTEEN_PATH } from '@/components/logo-geometry'
+import { BRAND_RATIO } from '@/components/brand-assets'
 import { LOCAL_UPLOAD_DIR } from './storage'
 
 /** Imágenes para compartir (WhatsApp, Facebook, X…): 1200×630 con la identidad de Florece 13. */
@@ -33,10 +33,22 @@ export async function artUri(svg: string) {
   return `data:image/jpeg;base64,${jpg.toString('base64')}`
 }
 
-function markSvg(tone: 'dark' | 'light') {
-  const ink = tone === 'light' ? '#F7F3EE' : '#1F1D1B'
-  const petals = PETALS.map((p) => `<circle cx="${FLOWER.cx + p.dx}" cy="${FLOWER.cy + p.dy}" r="${p.r}" fill="${p.color}"/>`).join('')
-  return svgUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${V.x} ${V.y} ${V.w} ${V.h}"><path d="${THIRTEEN_PATH}" fill="${ink}"/>${petals}</svg>`)
+/** Archivos del logo (public/brand/*.png) como data URI, al alto pedido. */
+const BRAND_DIR = path.join(/*turbopackIgnore: true*/ process.cwd(), 'public/brand')
+const brandCache = new Map<string, Promise<string>>()
+function brandUri(name: 'lockup' | 'lockup-light' | 'logo' | 'logo-light', height: number) {
+  const key = `${name}@${height}`
+  if (!brandCache.has(key)) {
+    brandCache.set(
+      key,
+      sharp(path.join(BRAND_DIR, `${name}.png`))
+        .resize({ height: Math.round(height * 2) })
+        .png()
+        .toBuffer()
+        .then((b) => `data:image/png;base64,${b.toString('base64')}`),
+    )
+  }
+  return brandCache.get(key)!
 }
 
 /** Foto de un producto/tienda como data URI JPEG (Satori no lee WebP). */
@@ -60,14 +72,10 @@ export async function photoUri(url: string | null | undefined, width = 700) {
   }
 }
 
-function Logo({ tone = 'dark', size = 46 }: { tone?: 'dark' | 'light'; size?: number }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'flex-end', gap: size * 0.12 }}>
-      <span style={{ fontFamily: 'Archivo Black', fontSize: size * 0.62, color: tone === 'light' ? '#F7F3EE' : '#1F1D1B', letterSpacing: -1 }}>Florece</span>
-      {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
-      <img src={markSvg(tone)} width={(size * V.w) / V.h} height={size} />
-    </div>
-  )
+async function lockup(tone: 'dark' | 'light', height: number) {
+  const src = await brandUri(tone === 'light' ? 'lockup-light' : 'lockup', height)
+  // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+  return <img src={src} width={Math.round(height * BRAND_RATIO.lockup)} height={height} />
 }
 
 const Band = () => (
@@ -78,22 +86,25 @@ const Band = () => (
   </div>
 )
 
-/** Portada del sitio: fondo cemento, ladera y el lema. */
-export async function siteImage({ ladera, domain }: { ladera: string; domain: string }) {
+/** Portada del sitio: el logo completo sobre cemento y el lema. */
+export async function siteImage({ domain }: { domain: string }) {
+  const logoH = 520
+  const logo = await brandUri('logo-light', logoH)
   return new ImageResponse(
     (
-      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: '#1F1D1B', position: 'relative', fontFamily: 'Archivo' }}>
+      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', background: '#1F1D1B', position: 'relative', fontFamily: 'Archivo', padding: '0 64px 14px 56px', gap: 48 }}>
         {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
-        <img src={svgUri(ladera)} width={1200} height={300} style={{ position: 'absolute', left: 0, bottom: 14 }} />
-        <div style={{ display: 'flex', flexDirection: 'column', padding: '56px 72px', gap: 14 }}>
-          <Logo tone="light" size={52} />
-          <span style={{ fontFamily: 'Marker', fontSize: 34, color: '#FF8A00', transform: 'rotate(-3deg)', marginTop: 18 }}>¡hecho en la 13!</span>
-          <div style={{ display: 'flex', flexDirection: 'column', fontFamily: 'Archivo Black', fontSize: 78, lineHeight: 0.95, color: '#F7F3EE', letterSpacing: -2 }}>
-            <span>Del barrio, para</span>
-            <span style={{ color: '#2ECC71' }}>todo el país.</span>
+        <img src={logo} width={Math.round(logoH * BRAND_RATIO.logo)} height={logoH} />
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: 18 }}>
+          <span style={{ fontFamily: 'Marker', fontSize: 36, color: '#FF8A00', transform: 'rotate(-3deg)' }}>¡hecho en la 13!</span>
+          <div style={{ display: 'flex', flexDirection: 'column', fontFamily: 'Archivo Black', fontSize: 68, lineHeight: 0.98, color: '#F7F3EE', letterSpacing: -2 }}>
+            <span>Del barrio,</span>
+            <span>para todo</span>
+            <span style={{ color: '#2ECC71' }}>el país.</span>
           </div>
+          <span style={{ fontSize: 26, fontWeight: 500, color: '#BDB5A9', lineHeight: 1.35 }}>Artesanías, ropa, arte y sabores de la Comuna 13, directo de quienes los hacen.</span>
+          <span style={{ fontSize: 26, fontWeight: 700, color: '#F7F3EE', marginTop: 6 }}>{domain}</span>
         </div>
-        <span style={{ position: 'absolute', right: 72, top: 64, fontSize: 26, fontWeight: 700, color: '#D8D0C4' }}>{domain}</span>
         <Band />
       </div>
     ),
@@ -141,7 +152,7 @@ export async function cardImage({
             )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Logo size={44} />
+            {await lockup('dark', 64)}
             <span style={{ fontSize: 22, fontWeight: 700, color: '#6B6259' }}>{domain}</span>
           </div>
         </div>
@@ -155,22 +166,23 @@ export async function cardImage({
 }
 
 /** Pantalla de arranque de iOS (apple-touch-startup-image): se ve mientras abre la app instalada. */
-export async function splashImage(width: number, height: number, ladera: string) {
-  const u = Math.min(width, height) / 100
-  const laderaH = Math.round(width * 0.42)
+export async function splashImage(width: number, height: number) {
+  const logoW = Math.round(width * 0.62)
+  const logoH = Math.round(logoW / BRAND_RATIO.logo)
+  const logo = await brandUri('logo', logoH / 2)
   return new ImageResponse(
     (
-      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#F7F3EE', position: 'relative', fontFamily: 'Archivo' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: u * 30, height: u * 30, borderRadius: u * 7, background: '#222222', marginTop: -laderaH * 0.5 }}>
-          {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
-          <img src={markSvg('light')} width={u * 22} height={(u * 22 * V.h) / V.w} />
-        </div>
-        <span style={{ fontFamily: 'Archivo Black', fontSize: u * 9, color: '#1F1D1B', marginTop: u * 6, letterSpacing: -u * 0.2 }}>Florece 13</span>
-        <span style={{ fontFamily: 'Marker', fontSize: u * 5.4, color: '#B4127A', marginTop: u * 1.5, transform: 'rotate(-3deg)' }}>¡hecho en la 13!</span>
+      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F7F3EE' }}>
         {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
-        <img src={svgUri(ladera)} width={width} height={laderaH} style={{ position: 'absolute', left: 0, bottom: 0 }} />
+        <img src={logo} width={logoW} height={logoH} style={{ marginTop: -Math.round(height * 0.04) }} />
       </div>
     ),
-    { width, height, fonts: await fonts() },
+    { width, height },
   )
+}
+
+/** PNG → JPEG: WhatsApp a veces no muestra vistas previas de más de ~300 KB. */
+export async function asJpeg(res: Response, quality = 84) {
+  const jpg = await sharp(Buffer.from(await res.arrayBuffer())).flatten({ background: '#F7F3EE' }).jpeg({ quality, mozjpeg: true }).toBuffer()
+  return new Response(new Uint8Array(jpg), { headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': res.headers.get('Cache-Control') ?? 'public, max-age=3600' } })
 }

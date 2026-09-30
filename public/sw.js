@@ -4,11 +4,11 @@
  * - Páginas: siempre de la red (precios, stock y sesión deben estar al día);
  *   sin conexión se muestra /offline.
  */
-const VERSION = 'f13-v1'
+const VERSION = 'f13-v2'
 const STATIC = `${VERSION}-static`
 const MEDIA = `${VERSION}-media`
 const OFFLINE = '/offline'
-const PRECACHE = [OFFLINE, '/icon', '/apple-icon', '/app-icon/icon-192.png']
+const PRECACHE = [OFFLINE, '/icons/icon-192.png', '/icons/apple-touch-icon.png', '/brand/lockup.webp', '/brand/lockup-light.webp']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -45,7 +45,7 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  if (url.pathname.startsWith('/_next/static/') || /\.(woff2?|ttf)$/.test(url.pathname) || url.pathname.startsWith('/app-icon/')) {
+  if (url.pathname.startsWith('/_next/static/') || /\.(woff2?|ttf)$/.test(url.pathname) || url.pathname.startsWith('/icons/') || url.pathname.startsWith('/brand/')) {
     event.respondWith(
       caches.match(req).then(
         (hit) =>
