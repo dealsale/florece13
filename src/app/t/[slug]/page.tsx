@@ -41,6 +41,13 @@ export default async function StorePage({ params }: { params: Params }) {
   const preview = store.status !== 'ACTIVE'
   const products = await listProducts({ storeId: store.id, limit: 200, includeUnavailable: true, includeInactiveStore: preview })
   const cat = store.category
+  const cats = store.categories.map((c) => c.category).sort((a, b) => (a.id === store.categoryId ? -1 : b.id === store.categoryId ? 1 : a.position - b.position))
+  const goods = products.filter((p) => p.kind === 'PRODUCTO')
+  const services = products.filter((p) => p.kind === 'SERVICIO')
+  const sections = [
+    { key: 'p', tag: 'catálogo', title: services.length ? 'Productos' : 'Lo que hacemos', items: goods, unit: ['producto', 'productos'] },
+    { key: 's', tag: 'para vivir la 13', title: goods.length ? 'Servicios y experiencias' : 'Lo que ofrecemos', items: services, unit: ['servicio', 'servicios'] },
+  ].filter((s) => s.items.length > 0)
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -83,7 +90,9 @@ export default async function StorePage({ params }: { params: Params }) {
             {store.tagline && <p className="lede">{store.tagline}</p>}
           </div>
           <div className="row" style={{ ['--gap' as string]: '8px' }}>
-            {cat && <span className="chip"><span className="dot" style={{ ['--c' as string]: CATEGORY_COLORS[cat.slug] }} />{cat.name}</span>}
+            {cats.map((c) => (
+              <Link key={c.id} href={`/tiendas?cat=${c.slug}`} className="chip"><span className="dot" style={{ ['--c' as string]: CATEGORY_COLORS[c.slug] }} />{c.name}</Link>
+            ))}
             {store.sector && <span className="chip"><Icon name="ubicacion" size={14} /> {store.sector}, Comuna 13</span>}
             {store.shipsNationwide && <span className="chip"><Icon name="envio" size={14} /> Envíos a todo el país</span>}
           </div>
@@ -111,19 +120,22 @@ export default async function StorePage({ params }: { params: Params }) {
           </section>
         )}
 
-        <section className="sec">
-          <div className="sec__head">
-            <div><span className="tag">catálogo</span><h2 className="h2">Lo que hacemos</h2></div>
-            <span className="muted small">{products.length} {products.length === 1 ? 'producto' : 'productos'}</span>
-          </div>
-          {products.length > 0 ? (
-            <div className="grid-prods">{products.map((p, i) => <ProductCard key={p.id} product={p} showStore={false} i={i} />)}</div>
-          ) : (
-            <EmptyState title="Aquí florecerán sus productos." text={isOwner ? 'Publicá el primero y compartí tu tienda.' : 'Esta tienda está preparando su catálogo. Escribile por WhatsApp mientras tanto.'}>
-              {isOwner && <Link href="/panel/productos/nuevo" className="btn btn-primary">Publicar producto</Link>}
+        {sections.map((sec) => (
+          <section key={sec.key} className="sec">
+            <div className="sec__head">
+              <div><span className="tag">{sec.tag}</span><h2 className="h2">{sec.title}</h2></div>
+              <span className="muted small">{sec.items.length} {sec.items.length === 1 ? sec.unit[0] : sec.unit[1]}</span>
+            </div>
+            <div className="grid-prods">{sec.items.map((p, i) => <ProductCard key={p.id} product={p} showStore={false} i={i} />)}</div>
+          </section>
+        ))}
+        {products.length === 0 && (
+          <section className="sec">
+            <EmptyState title="Aquí florecerá su catálogo." text={isOwner ? 'Publicá tu primer producto o servicio y compartí tu tienda.' : 'Esta tienda está preparando su catálogo. Escribile por WhatsApp mientras tanto.'}>
+              {isOwner && <Link href="/panel/productos/nuevo" className="btn btn-primary">Publicar</Link>}
             </EmptyState>
-          )}
-        </section>
+          </section>
+        )}
       </div>
     </>
   )

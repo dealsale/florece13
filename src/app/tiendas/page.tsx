@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { EmptyState } from '@/components/EmptyState'
 import { Icon } from '@/components/Icon'
 import { StoreCard } from '@/components/StoreCard'
-import { getCategories, listStores } from '@/lib/queries'
+import { getCategoryUsage, listStores } from '@/lib/queries'
 
 export const metadata: Metadata = {
   title: 'Tiendas de la 13',
@@ -15,7 +15,8 @@ export const metadata: Metadata = {
 
 export default async function TiendasPage({ searchParams }: { searchParams: Promise<{ cat?: string }> }) {
   const { cat = '' } = await searchParams
-  const [categories, stores] = await Promise.all([getCategories(), listStores({ categorySlug: cat || undefined, limit: 120 })])
+  const [usage, stores] = await Promise.all([getCategoryUsage(), listStores({ categorySlug: cat || undefined, limit: 120 })])
+  const categories = usage.filter((c) => c.stores > 0 || c.slug === cat)
   return (
     <div className="wrap">
       <section className="stack" style={{ paddingTop: 28 }}>

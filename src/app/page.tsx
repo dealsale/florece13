@@ -7,7 +7,7 @@ import { StoreCard } from '@/components/StoreCard'
 import { Svg } from '@/components/Svg'
 import { getStoreForUser, getCurrentUser } from '@/lib/auth'
 import { ladera, stairs } from '@/lib/art'
-import { getCategories, getHomeStats, listProducts, listStores } from '@/lib/queries'
+import { getCategoryUsage, getHomeStats, listProducts, listStores } from '@/lib/queries'
 import { appUrl } from '@/lib/url'
 
 const WORDS = ['Mochilas tejidas', 'Café de la loma', 'Serigrafía', 'Streetwear', 'Obleas', 'Arte de muro', 'Recuerdos', 'Hecho en la 13']
@@ -17,13 +17,16 @@ const CTA_ART = stairs('#2ECC71', 6)
 
 export default async function HomePage() {
   const user = await getCurrentUser()
-  const [categories, stores, products, stats, myStore] = await Promise.all([
-    getCategories(),
+  const [usage, stores, products, stats, myStore] = await Promise.all([
+    getCategoryUsage(),
     listStores({ limit: 8 }),
     listProducts({ limit: 9 }),
     getHomeStats(),
     user ? getStoreForUser(user.id) : null,
   ])
+
+  // Solo las categorías que ya tienen algo publicado (la lista completa vive en los formularios).
+  const categories = usage.filter((c) => c.products > 0 || c.stores > 0)
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -74,20 +77,22 @@ export default async function HomePage() {
       </div>
 
       <div className="wrap">
+        {categories.length > 0 && (
         <section className="sec">
           <div className="sec__head"><div><span className="tag">explorá</span><h2 className="h2">¿Qué te antoja hoy?</h2></div></div>
           <div className="cats">
             {categories.map((c, i) => {
-              const n = stats.perCategory[c.slug] ?? 0
+              const n = c.products
               return (
                 <Link key={c.id} href={`/buscar?cat=${c.slug}`} className="cat rise" data-k={i} style={{ ['--i' as string]: i }}>
                   <span className="cat__ic"><Icon name={c.icon} size={24} /></span>
-                  <span><b>{c.name}</b><br /><small>{n} {n === 1 ? 'producto' : 'productos'}</small></span>
+                  <span><b>{c.name}</b><br /><small>{n > 0 ? `${n} ${n === 1 ? 'publicación' : 'publicaciones'}` : `${c.stores} ${c.stores === 1 ? 'tienda' : 'tiendas'}`}</small></span>
                 </Link>
               )
             })}
           </div>
         </section>
+        )}
 
         <section className="sec">
           <div className="sec__head">

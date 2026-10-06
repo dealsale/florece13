@@ -104,6 +104,105 @@ async function remove() {
   console.log(`Datos de prueba borrados (${users.length} cuentas).`)
 }
 
+/*
+ * Lo que se sumó después (varias categorías, opciones y servicios). Es idempotente y también completa
+ * tiendas de prueba que ya existían: solo agrega lo que falta.
+ */
+const EXTRAS = {
+  'ladera-streetwear': {
+    categories: ['ropa', 'diseno', 'talleres'],
+    options: {
+      'Camiseta Ladera': {
+        options: [
+          { name: 'Color', values: ['Negro', 'Blanco', 'Verde'] },
+          { name: 'Talla', values: ['S', 'M', 'L', 'XL'] },
+        ],
+        price: (v) => (v[1] === 'XL' ? 74900 : null),
+        off: ['Verde / S'],
+      },
+    },
+    services: [
+      {
+        name: 'Taller de estampado en serigrafía',
+        price: 120000,
+        duration: '3 horas',
+        description: 'Aprendé a estampar tu propia camiseta con nosotros en el taller. Incluye la camiseta, tintas y un café.',
+        categories: ['talleres', 'diseno', 'experiencias'],
+        options: [{ name: 'Personas', values: ['1 persona', '2 a 4 personas'] }],
+        price2: (v) => (v[0] === '2 a 4 personas' ? 380000 : null),
+      },
+    ],
+  },
+  'tejidos-dona-amparo': {
+    categories: ['accesorios', 'bolsos', 'joyeria', 'artesanias'],
+    productCategories: { 'Mochila tejida Independencias': ['bolsos', 'artesanias'], 'Bolso manos libres de colores': ['bolsos', 'accesorios'], 'Aretes de chaquira': ['joyeria', 'artesanias'] },
+    options: {
+      'Mochila tejida Independencias': { options: [{ name: 'Color', values: ['Tierra', 'Mar', 'Atardecer'] }], price: () => null, off: ['Mar'] },
+    },
+    services: [],
+  },
+  'recuerdos-del-salado': {
+    categories: ['souvenirs', 'experiencias', 'fotografia'],
+    options: {},
+    services: [
+      {
+        name: 'Tour fotográfico por la 13',
+        price: 60000,
+        priceFrom: true,
+        duration: '2 horas',
+        description: 'Recorrido por los murales, las escaleras eléctricas y los miradores, con un fotógrafo del barrio. Te llevás tus fotos editadas.',
+        categories: ['experiencias', 'fotografia'],
+        options: [{ name: 'Grupo', values: ['1 persona', '2 a 4 personas', '5 o más'] }],
+        price2: (v) => ({ '2 a 4 personas': 50000, '5 o más': 45000 })[v[0]] ?? null,
+      },
+      {
+        name: 'Sesión de fotos en los murales',
+        price: 150000,
+        duration: '1 hora',
+        description: 'Sesión personal o en pareja entre los grafitis de la 13. 20 fotos editadas en alta.',
+        categories: ['fotografia'],
+        options: [],
+      },
+    ],
+  },
+}
+
+const combos = (opts) => opts.reduce((acc, o) => acc.flatMap((c) => o.values.map((v) => [...c, v])), [[]])
+
+async function setVariants(productId, options, priceFn = () => null, off = []) {
+  await sql`update products set options = ${sql.json(options.map((o) => ({ name: o.name, values: o.values.map((v) => ({ v })) })))} where id = ${productId}`
+  for (const [position, values] of combos(options).entries())
+    await sql`insert into product_variants (product_id, values, price, is_available, position)
+      values (${productId}, ${sql.json(values)}, ${priceFn(values)}, ${!off.includes(values.join(' / '))}, ${position})`
+}
+
+async function extras(storeId, s, cats) {
+  const x = EXTRAS[s.slug]
+  if (!x) return
+  for (const slug of x.categories)
+    if (cats[slug]) await sql`insert into store_categories (store_id, category_id) values (${storeId}, ${cats[slug]}) on conflict do nothing`
+  await sql`insert into product_categories (product_id, category_id) select id, category_id from products where store_id = ${storeId} and category_id is not null on conflict do nothing`
+  for (const [name, slugs] of Object.entries(x.productCategories ?? {}))
+    for (const slug of slugs)
+      if (cats[slug]) await sql`insert into product_categories (product_id, category_id) select id, ${cats[slug]} from products where store_id = ${storeId} and name = ${name} on conflict do nothing`
+  for (const [name, o] of Object.entries(x.options)) {
+    const [p] = await sql`select id, options from products where store_id = ${storeId} and name = ${name}`
+    if (p && p.options.length === 0) await setVariants(p.id, o.options, o.price, o.off)
+  }
+  for (const sv of x.services) {
+    const [exists] = await sql`select 1 from products where store_id = ${storeId} and name = ${sv.name}`
+    if (exists) continue
+    const main = cats[sv.categories[0]] ?? null
+    const [p] = await sql`
+      insert into products (store_id, category_id, kind, name, description, price, price_from, duration, is_available)
+      values (${storeId}, ${main}, 'SERVICIO', ${sv.name}, ${sv.description}, ${sv.price}, ${sv.priceFrom ?? false}, ${sv.duration}, true)
+      returning id`
+    for (const slug of sv.categories)
+      if (cats[slug]) await sql`insert into product_categories (product_id, category_id) values (${p.id}, ${cats[slug]}) on conflict do nothing`
+    if (sv.options.length) await setVariants(p.id, sv.options, sv.price2)
+  }
+}
+
 async function seed() {
   const cats = Object.fromEntries((await sql`select id, slug from categories`).map((c) => [c.slug, c.id]))
   const hash = await bcrypt.hash(PASSWORD, 12)
@@ -151,6 +250,7 @@ async function seed() {
           await sql`insert into order_items (order_id, product_id, name, unit_price, quantity) values (${o.id}, ${i.id}, ${i.name}, ${i.price}, ${i.quantity})`
       }
     }
+    await extras(store.id, s, cats)
     console.log(`✔ ${s.name}  →  ${s.email}`)
   }
   console.log(`Tiendas de prueba listas. Clave de las 3 cuentas: ${PASSWORD}`)

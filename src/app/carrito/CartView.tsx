@@ -31,8 +31,8 @@ export function CartView() {
       )}
       {[...groups.entries()].map(([storeId, group], gi) => {
         const store = group[0].product.store
-        const available = group.filter((l) => l.product.isAvailable)
-        const subtotal = available.reduce((s, l) => s + l.product.price * l.quantity, 0)
+        const available = group.filter((l) => l.available)
+        const subtotal = available.reduce((s, l) => s + l.price * l.quantity, 0)
         return (
           <section key={storeId} className="card rise" style={{ ['--i' as string]: gi, overflow: 'hidden' }} aria-label={`Pedido a ${store.name}`}>
             <div className="cg__head">
@@ -40,31 +40,38 @@ export function CartView() {
               <Link href={`/t/${store.slug}`} style={{ fontWeight: 800 }}>{store.name}</Link>
             </div>
             {group.map((l) => (
-              <div key={l.productId} className="cl">
+              <div key={l.key} className="cl">
                 <Link href={`/p/${l.productId}`} className="cl__img">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={l.product.imageUrl ?? artSrc('producto', l.productId, l.product.categorySlug)} alt="" />
+                  <img src={l.image ?? artSrc('producto', l.productId, l.product.categorySlug)} alt="" />
                 </Link>
                 <div className="stack" style={{ ['--gap' as string]: '8px' }}>
                   <div className="row" style={{ alignItems: 'flex-start', flexWrap: 'nowrap' }}>
-                    <Link href={`/p/${l.productId}`} style={{ flex: 1, fontWeight: 700, lineHeight: 1.3 }}>{l.product.name}</Link>
-                    <span className="price">{formatPrice(l.product.price * l.quantity)}</span>
+                    <Link href={`/p/${l.productId}`} style={{ flex: 1, fontWeight: 700, lineHeight: 1.3 }}>
+                      {l.product.name}
+                      {l.label && <span className="cl__opt">{l.label}</span>}
+                    </Link>
+                    <span className="price">{formatPrice(l.price * l.quantity)}</span>
                   </div>
-                  {l.product.isAvailable ? (
+                  {l.available ? (
                     <div className="row" style={{ justifyContent: 'space-between' }}>
                       <div className="qty" role="group" aria-label="Cantidad">
-                        <button type="button" onClick={() => cart.setQuantity(l.productId, l.quantity - 1)} aria-label="Menos">−</button>
+                        <button type="button" onClick={() => cart.setQuantity(l.key, l.quantity - 1)} aria-label="Menos">−</button>
                         <output>{l.quantity}</output>
-                        <button type="button" onClick={() => cart.setQuantity(l.productId, l.quantity + 1)} aria-label="Más">+</button>
+                        <button type="button" onClick={() => cart.setQuantity(l.key, l.quantity + 1)} aria-label="Más">+</button>
                       </div>
-                      <button type="button" className="btn btn-ghost btn-sm" onClick={() => cart.remove(l.productId)}>
+                      <button type="button" className="btn btn-ghost btn-sm" onClick={() => cart.remove(l.key)}>
                         <Icon name="basura" size={18} /> Quitar
                       </button>
                     </div>
                   ) : (
                     <div className="row" style={{ justifyContent: 'space-between' }}>
-                      <span className="chip st-NUEVO">Agotado</span>
-                      <button type="button" className="btn btn-ghost btn-sm" onClick={() => cart.remove(l.productId)}>Quitar</button>
+                      {l.needsOption ? (
+                        <Link href={`/p/${l.productId}`} className="chip st-NUEVO">Elegí una opción →</Link>
+                      ) : (
+                        <span className="chip st-NUEVO">Agotado</span>
+                      )}
+                      <button type="button" className="btn btn-ghost btn-sm" onClick={() => cart.remove(l.key)}>Quitar</button>
                     </div>
                   )}
                 </div>

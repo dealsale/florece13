@@ -20,8 +20,11 @@ export default async function Image({ params }: { params: Promise<{ id: string }
     await cardImage({
     eyebrow: product.store.name,
     title: product.name,
-    price: formatPrice(product.price),
-    chips: [product.isAvailable ? 'Disponible' : 'Agotado', product.store.shipsNationwide ? 'Envíos a todo el país' : 'Recogida en la tienda'],
+    price: `${product.priceFrom ? 'Desde ' : ''}${formatPrice(product.price)}`,
+    chips:
+      product.kind === 'SERVICIO'
+        ? ['Servicio', product.duration || 'Reserva por WhatsApp'].filter(Boolean)
+        : [product.isAvailable ? 'Disponible' : 'Agotado', product.store.shipsNationwide ? 'Envíos a todo el país' : 'Recogida en la tienda'],
     image,
     domain,
     }),

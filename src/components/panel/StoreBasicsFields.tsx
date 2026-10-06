@@ -1,9 +1,11 @@
+import { CategoryChips } from './CategoryChips'
+
 type Errors = Record<string, string[] | undefined> | undefined
 
 export type StoreBasics = {
   name?: string
   tagline?: string
-  categoryId?: string | null
+  categoryIds?: string[]
   whatsapp?: string
   sector?: string
   instagram?: string
@@ -20,7 +22,7 @@ export function StoreBasicsFields({
   errors,
   defaults = {},
 }: {
-  categories: { id: string; name: string }[]
+  categories: { id: string; name: string; icon?: string }[]
   sectores: string[]
   errors: Errors
   defaults?: StoreBasics
@@ -38,14 +40,15 @@ export function StoreBasicsFields({
         <input id="tagline" name="tagline" className="input" maxLength={120} defaultValue={defaults.tagline} placeholder="Mochilas tejidas a mano en la parte alta de la 13" />
         {err('tagline') && <span className="ferr">{err('tagline')}</span>}
       </div>
-      <div className="field">
-        <label htmlFor="categoryId">¿Qué vendés?</label>
-        <select id="categoryId" name="categoryId" className="select" required defaultValue={defaults.categoryId ?? ''} aria-invalid={Boolean(err('categoryId'))}>
-          <option value="" disabled>Elegí una categoría</option>
-          {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
-        {err('categoryId') && <span className="ferr">{err('categoryId')}</span>}
-      </div>
+      <CategoryChips
+        name="categoryIds"
+        label="¿Qué vendés u ofrecés?"
+        hint="Podés elegir hasta 4: productos y también servicios o experiencias. La primera es la principal."
+        categories={categories}
+        initial={defaults.categoryIds}
+        max={4}
+        error={err('categoryIds')}
+      />
       <div className="field">
         <label htmlFor="whatsapp">WhatsApp de la tienda</label>
         <div className="prefix">

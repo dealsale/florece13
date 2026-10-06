@@ -18,7 +18,7 @@ export default async function CrearTiendaPage() {
         <h1 className="h1" style={{ marginTop: 12 }}>Armemos tu tienda, {user.name.split(' ')[0]}.</h1>
         <p className="muted" style={{ marginTop: 6 }}>Lo básico para empezar. Foto, portada e historia las agregás después.</p>
       </div>
-      <CreateStoreForm categories={categories.map((c) => ({ id: c.id, name: c.name }))} sectores={SECTORES} />
+      <CreateStoreForm categories={categories.map((c) => ({ id: c.id, name: c.name, icon: c.icon }))} sectores={SECTORES} />
     </div>
   )
 }

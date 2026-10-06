@@ -1,14 +1,17 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Icon } from './Icon'
 import { uploadImage } from './upload'
 
 const MAX = 6
 
 /** Fotos del producto: varias, ordenables. La primera es la portada. Guarda las URLs en un input oculto. */
-export function ImageUploader({ name, initial = [] }: { name: string; initial?: string[] }) {
+export function ImageUploader({ name, initial = [], onChange }: { name: string; initial?: string[]; onChange?: (urls: string[]) => void }) {
   const [urls, setUrls] = useState<string[]>(initial)
+  useEffect(() => {
+    onChange?.(urls)
+  }, [urls, onChange])
   const [busy, setBusy] = useState(0)
   const [error, setError] = useState('')
   const input = useRef<HTMLInputElement>(null)

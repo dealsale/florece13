@@ -10,14 +10,16 @@ La vitrina digital de los comercios de la Comuna 13 de Medellín. Cada tienda de
 - Inicio con buscador, categorías, tiendas y productos recién publicados.
 - Búsqueda por texto y categoría, listado de tiendas.
 - Perfil de tienda: portada, logo, historia, sector de la 13, catálogo, WhatsApp e Instagram.
-- Ficha de producto: galería, precio (con precio anterior tachado), "Pedir por WhatsApp" y "Agregar al carrito".
+- Ficha de producto: galería, precio (con precio anterior tachado), opciones (p. ej. Color × Talla) que cambian precio y foto, "Pedir por WhatsApp" y "Agregar al carrito".
+- Servicios y experiencias (tours, talleres, fotografía…): "Desde $…", duración y "Reservar por WhatsApp" con la opción elegida. En la tienda aparecen en su propia sección.
+- 24 categorías con ícono (productos y servicios). Productos y tiendas pueden tener varias; el inicio y los filtros solo muestran las que ya tienen publicaciones.
 - **Instalable como app (PWA)** en iPhone, Android y computador: aviso flotante (se puede cerrar y vuelve a los 14 días) y bloque en el pie de página. En Android/Chrome abre la ventana nativa de instalación; en iOS muestra los pasos (Compartir → Agregar a pantalla de inicio); dentro de Instagram/Facebook pide abrir en el navegador. Incluye íconos maskable, pantallas de arranque para iPhone, accesos directos y un service worker que guarda los archivos de la app y las fotos, con página propia sin conexión (`public/sw.js`, `src/components/InstallApp.tsx`).
 - Carrito agrupado por tienda y checkout: el pedido **se guarda en la base de datos** y el comprador lo envía a la tienda por WhatsApp con el resumen ya escrito. Recibe un link para consultar el estado.
 
 **Comerciantes** (`/panel`):
 - Registro → crear tienda (nombre, categoría, WhatsApp, sector, Instagram).
 - Resumen: pedidos nuevos, pedidos y ventas del mes, lista de pasos para completar la tienda.
-- Productos: crear, editar, borrar, marcar como agotado. Hasta 6 fotos por producto, ordenables. Las fotos se reducen en el celular antes de subirlas (ahorra datos) y el servidor las normaliza a WebP.
+- Catálogo: productos y servicios. Crear, editar, borrar, marcar como agotado. Hasta 6 fotos, ordenables. Hasta 3 categorías. Opciones (hasta 2 grupos, 60 combinaciones) con foto por valor y precio/disponibilidad por combinación; al editar, las combinaciones conservan su id para no romper carritos. Las fotos se reducen en el celular antes de subirlas (ahorra datos) y el servidor las normaliza a WebP.
 - Pedidos: lista con filtros por estado, detalle, cambio de estado (el comprador lo ve en su link) y mensaje de WhatsApp prearmado para el cliente.
 - Mi tienda: logo, portada, historia, dirección, forma de entrega (envío nacional y/o recoger).
 - QR y sticker "Florece aquí" para imprimir o descargar.
@@ -48,7 +50,7 @@ Requisitos: Node 22+ y PostgreSQL 14+.
 npm install
 cp .env.example .env        # completar DATABASE_URL, APP_URL y ADMIN_EMAILS
 npm run db:migrate          # crea las tablas
-npm run db:seed             # carga las 6 categorías (artesanías, ropa, comida, arte, souvenirs, servicios)
+npm run db:seed             # carga las 24 categorías (lista en scripts/seed.mjs)
 npm run dev                 # http://localhost:3000
 ```
 

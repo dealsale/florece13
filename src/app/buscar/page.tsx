@@ -5,7 +5,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { Icon } from '@/components/Icon'
 import { ProductCard } from '@/components/ProductCard'
 import { StoreCard } from '@/components/StoreCard'
-import { getCategories, listProducts, listStores } from '@/lib/queries'
+import { getCategoryUsage, listProducts, listStores } from '@/lib/queries'
 
 export const metadata: Metadata = {
   title: 'Productos de la Comuna 13',
@@ -22,12 +22,13 @@ export default async function BuscarPage({ searchParams }: { searchParams: Promi
   const cat = sp.cat ?? ''
   const page = Math.max(1, Number.parseInt(sp.pagina ?? '1', 10) || 1)
 
-  const [categories, products, stores] = await Promise.all([
-    getCategories(),
+  const [usage, products, stores] = await Promise.all([
+    getCategoryUsage(),
     listProducts({ q, categorySlug: cat || undefined, limit: PAGE_SIZE * page + 1 }),
     q ? listStores({ q, limit: 6 }) : Promise.resolve([]),
   ])
   const hasMore = products.length > PAGE_SIZE * page
+  const categories = usage.filter((c) => c.products > 0 || c.slug === cat)
   const shown = products.slice(0, PAGE_SIZE * page)
   const category = categories.find((c) => c.slug === cat)
 

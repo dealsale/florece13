@@ -12,8 +12,8 @@ export function StoreSettingsForm({
   categories,
   sectores,
 }: {
-  store: Store
-  categories: { id: string; name: string }[]
+  store: Store & { categoryIds: string[] }
+  categories: { id: string; name: string; icon?: string }[]
   sectores: string[]
 }) {
   const [state, action, pending] = useActionState<FormState, FormData>(updateStore, null)

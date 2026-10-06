@@ -9,7 +9,7 @@ const LINKS = [
   { href: '/panel', label: 'Resumen', icon: 'inicio', exact: true, tour: 'nav-resumen' },
   { href: '/panel/pedidos', label: 'Pedidos', icon: 'pedidos', tour: 'nav-pedidos' },
   { href: '/panel/avisos', label: 'Avisos', icon: 'campana', tour: 'nav-avisos' },
-  { href: '/panel/productos', label: 'Productos', icon: 'florece', tour: 'nav-productos' },
+  { href: '/panel/productos', label: 'Catálogo', icon: 'florece', tour: 'nav-productos' },
   { href: '/panel/tienda', label: 'Mi tienda', icon: 'tienda', tour: 'nav-tienda' },
   { href: '/panel/qr', label: 'QR y sticker', icon: 'qr', tour: 'nav-qr' },
 ]

@@ -3,6 +3,8 @@ import {
   boolean,
   index,
   integer,
+  jsonb,
+  primaryKey,
   pgEnum,
   pgTable,
   text,
@@ -25,6 +27,14 @@ export const orderStatus = pgEnum('order_status', [
 export const orderChannel = pgEnum('order_channel', ['WHATSAPP', 'CHECKOUT'])
 export const paymentStatus = pgEnum('payment_status', ['PENDIENTE', 'PAGADO', 'FALLIDO', 'REEMBOLSADO'])
 export const deliveryMethod = pgEnum('delivery_method', ['ENVIO', 'RECOGER'])
+/** Lo que se publica: un producto (va al carrito) o un servicio/experiencia (se reserva por WhatsApp). */
+export const productKind = pgEnum('product_kind', ['PRODUCTO', 'SERVICIO'])
+
+/**
+ * Opciones de un producto (máx. 2 grupos), p. ej. [{ name: 'Color', values: [{ v: 'Negro', img: '/media/…' }] }, { name: 'Talla', values: [{ v: 'M' }] }].
+ * `img` es una de las fotos del producto: al elegir ese valor, la galería muestra esa foto.
+ */
+export type ProductOption = { name: string; values: { v: string; img?: string | null }[] }
 
 const timestamps = {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -111,8 +121,14 @@ export const products = pgTable(
     categoryId: uuid('category_id').references(() => categories.id, { onDelete: 'set null' }),
     name: text('name').notNull(),
     description: text('description').notNull().default(''),
-    /** Pesos colombianos, sin decimales. */
+    kind: productKind('kind').notNull().default('PRODUCTO'),
+    /** Pesos colombianos, sin decimales. Con variantes es el precio base (cada variante puede tener el suyo). */
     price: integer('price').notNull(),
+    /** Se muestra "Desde $…" (servicios con precio según grupo, duración, etc.). */
+    priceFrom: boolean('price_from').notNull().default(false),
+    /** Servicios: "2 horas", "Sesión de 1 hora"… */
+    duration: text('duration').notNull().default(''),
+    options: jsonb('options').$type<ProductOption[]>().notNull().default([]),
     compareAtPrice: integer('compare_at_price'),
     isAvailable: boolean('is_available').notNull().default(true),
     ...timestamps,
@@ -135,6 +151,51 @@ export const productImages = pgTable(
     position: integer('position').notNull().default(0),
   },
   (t) => [index('product_images_product_idx').on(t.productId)],
+)
+
+/** Combinaciones de opciones (Negro / M). Sin precio propio usan el del producto. */
+export const productVariants = pgTable(
+  'product_variants',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    productId: uuid('product_id')
+      .notNull()
+      .references(() => products.id, { onDelete: 'cascade' }),
+    /** Un valor por cada grupo de opciones, en el mismo orden que products.options. */
+    values: jsonb('values').$type<string[]>().notNull(),
+    price: integer('price'),
+    isAvailable: boolean('is_available').notNull().default(true),
+    position: integer('position').notNull().default(0),
+  },
+  (t) => [index('product_variants_product_idx').on(t.productId)],
+)
+
+/** Categorías de cada producto (puede tener varias; products.category_id es la principal). */
+export const productCategories = pgTable(
+  'product_categories',
+  {
+    productId: uuid('product_id')
+      .notNull()
+      .references(() => products.id, { onDelete: 'cascade' }),
+    categoryId: uuid('category_id')
+      .notNull()
+      .references(() => categories.id, { onDelete: 'cascade' }),
+  },
+  (t) => [primaryKey({ columns: [t.productId, t.categoryId] }), index('product_categories_category_idx').on(t.categoryId)],
+)
+
+/** Categorías de cada tienda (puede tener varias; stores.category_id es la principal). */
+export const storeCategories = pgTable(
+  'store_categories',
+  {
+    storeId: uuid('store_id')
+      .notNull()
+      .references(() => stores.id, { onDelete: 'cascade' }),
+    categoryId: uuid('category_id')
+      .notNull()
+      .references(() => categories.id, { onDelete: 'cascade' }),
+  },
+  (t) => [primaryKey({ columns: [t.storeId, t.categoryId] }), index('store_categories_category_idx').on(t.categoryId)],
 )
 
 export const orders = pgTable(
@@ -173,8 +234,10 @@ export const orderItems = pgTable(
       .notNull()
       .references(() => orders.id, { onDelete: 'cascade' }),
     productId: uuid('product_id').references(() => products.id, { onDelete: 'set null' }),
-    /** Copia del nombre y precio al momento del pedido. */
+    variantId: uuid('variant_id').references(() => productVariants.id, { onDelete: 'set null' }),
+    /** Copia del nombre (con la opción elegida, p. ej. "Camiseta Ladera · Negro / M") y del precio al momento del pedido. */
     name: text('name').notNull(),
+    variantLabel: text('variant_label').notNull().default(''),
     unitPrice: integer('unit_price').notNull(),
     quantity: integer('quantity').notNull(),
   },
@@ -188,6 +251,7 @@ export const usersRelations = relations(users, ({ one }) => ({
 export const storesRelations = relations(stores, ({ one, many }) => ({
   owner: one(users, { fields: [stores.ownerId], references: [users.id] }),
   category: one(categories, { fields: [stores.categoryId], references: [categories.id] }),
+  categories: many(storeCategories),
   products: many(products),
   orders: many(orders),
 }))
@@ -238,6 +302,22 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   store: one(stores, { fields: [products.storeId], references: [stores.id] }),
   category: one(categories, { fields: [products.categoryId], references: [categories.id] }),
   images: many(productImages),
+  variants: many(productVariants),
+  categories: many(productCategories),
+}))
+
+export const productVariantsRelations = relations(productVariants, ({ one }) => ({
+  product: one(products, { fields: [productVariants.productId], references: [products.id] }),
+}))
+
+export const productCategoriesRelations = relations(productCategories, ({ one }) => ({
+  product: one(products, { fields: [productCategories.productId], references: [products.id] }),
+  category: one(categories, { fields: [productCategories.categoryId], references: [categories.id] }),
+}))
+
+export const storeCategoriesRelations = relations(storeCategories, ({ one }) => ({
+  store: one(stores, { fields: [storeCategories.storeId], references: [stores.id] }),
+  category: one(categories, { fields: [storeCategories.categoryId], references: [categories.id] }),
 }))
 
 export const productImagesRelations = relations(productImages, ({ one }) => ({
@@ -259,6 +339,7 @@ export type Store = typeof stores.$inferSelect
 export type Category = typeof categories.$inferSelect
 export type Product = typeof products.$inferSelect
 export type ProductImage = typeof productImages.$inferSelect
+export type ProductVariant = typeof productVariants.$inferSelect
 export type Order = typeof orders.$inferSelect
 export type OrderItem = typeof orderItems.$inferSelect
 export type Notification = typeof notifications.$inferSelect

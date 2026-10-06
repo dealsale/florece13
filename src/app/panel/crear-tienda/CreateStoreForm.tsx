@@ -5,7 +5,7 @@ import { StoreBasicsFields } from '@/components/panel/StoreBasicsFields'
 import { createStore, type FormState } from '@/lib/actions/merchant'
 import { useSubmit } from '@/components/useSubmit'
 
-export function CreateStoreForm(props: { categories: { id: string; name: string }[]; sectores: string[] }) {
+export function CreateStoreForm(props: { categories: { id: string; name: string; icon?: string }[]; sectores: string[] }) {
   const [state, action, pending] = useActionState<FormState, FormData>(createStore, null)
   const onSubmit = useSubmit(action)
   return (

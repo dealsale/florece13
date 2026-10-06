@@ -1,3 +1,4 @@
+import { formatPrice } from '@/lib/format'
 import Link from 'next/link'
 import { artSrc, CATEGORY_COLORS } from '@/lib/art'
 import type { ProductCardData } from '@/lib/queries'
@@ -12,8 +13,10 @@ export function ProductCard({ product: p, showStore = true, i = 0 }: { product: 
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={p.imageUrl ?? artSrc('producto', p.id, p.categorySlug)} alt="" loading="lazy" decoding="async" />
         </Link>
-        {!p.isAvailable && <span className="chip chip-dark">Agotado</span>}
-        {p.isAvailable && <QuickAdd productId={p.id} storeId={p.storeId} name={p.name} />}
+        {p.kind === 'SERVICIO' && <span className="chip chip-kind-lg prod__kind">Servicio</span>}
+        {!p.isAvailable && <span className="chip chip-dark">{p.kind === 'SERVICIO' ? 'Pausado' : 'Agotado'}</span>}
+        {/* Agregar rápido solo si no hay nada que elegir; servicios y productos con opciones van a la ficha. */}
+        {p.isAvailable && p.kind === 'PRODUCTO' && !p.hasOptions && <QuickAdd productId={p.id} storeId={p.storeId} name={p.name} />}
       </div>
       <Link href={`/p/${p.id}`} className="prod__txt">
         <span className="prod__name">{p.name}</span>
@@ -23,7 +26,11 @@ export function ProductCard({ product: p, showStore = true, i = 0 }: { product: 
             {p.storeName}
           </span>
         )}
-        <Price value={p.price} compareAt={p.compareAtPrice} />
+        {p.priceFrom || p.minPrice !== p.maxPrice ? (
+          <div className="price"><span className="price__from">Desde</span> {formatPrice(p.minPrice)}</div>
+        ) : (
+          <Price value={p.minPrice} compareAt={p.compareAtPrice} />
+        )}
       </Link>
     </div>
   )

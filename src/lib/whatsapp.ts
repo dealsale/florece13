@@ -77,13 +77,25 @@ export function merchantReply(
   ].join('\n')
 }
 
-export function productMessage(productName: string, price: number, productUrl: string, rich = true) {
+export function productMessage(productName: string, price: number, productUrl: string, rich = true, option = '') {
   return [
     `¡Hola!${rich ? ' 👋' : ''} Vi esto en *Florece 13* y me interesa:`,
     '',
-    `${e(rich, '🛍️')}*${productName}* — ${formatPrice(price)}`,
+    `${e(rich, '🛍️')}*${productName}*${option ? ` (${option})` : ''} — ${formatPrice(price)}`,
     '',
     `¿Está disponible?${rich ? ' 🙌' : ''}`,
+    productUrl,
+  ].join('\n')
+}
+
+/** Reserva de un servicio o experiencia. */
+export function serviceMessage(serviceName: string, price: number, priceFrom: boolean, productUrl: string, rich = true, option = '') {
+  return [
+    `¡Hola!${rich ? ' 👋' : ''} Quiero reservar este servicio que vi en *Florece 13*:`,
+    '',
+    `${e(rich, '✨')}*${serviceName}*${option ? ` (${option})` : ''} — ${priceFrom ? 'desde ' : ''}${formatPrice(price)}`,
+    '',
+    `¿Qué fechas y horarios tienen disponibles?${rich ? ' 🙌' : ''}`,
     productUrl,
   ].join('\n')
 }

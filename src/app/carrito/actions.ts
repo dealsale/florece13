@@ -5,9 +5,10 @@ import { notifyNewOrder, safeNotify } from '@/lib/notify'
 import { randomInt } from 'node:crypto'
 import { and, count, eq, gt, inArray } from 'drizzle-orm'
 import { z } from 'zod'
-import { db, orderItems, orders, products, stores } from '@/db'
+import { db, orderItems, orders, products, productVariants, stores } from '@/db'
 import { normalizePhone } from '@/lib/format'
 import { getProductsForCart } from '@/lib/queries'
+import { variantLabel } from '@/lib/variants'
 
 export async function getCartProducts(ids: string[]) {
   if (!Array.isArray(ids)) return []
@@ -25,7 +26,22 @@ export async function getCartProducts(ids: string[]) {
         .from(stores)
         .where(inArray(stores.id, storeIds))
     : []
-  return rows.map((r) => ({ ...r, store: storeRows.find((s) => s.id === r.storeId)! }))
+  const productIds = rows.map((r) => r.id)
+  const [variantRows, optionRows] = productIds.length
+    ? await Promise.all([
+        db
+          .select({ id: productVariants.id, productId: productVariants.productId, values: productVariants.values, price: productVariants.price, isAvailable: productVariants.isAvailable })
+          .from(productVariants)
+          .where(inArray(productVariants.productId, productIds)),
+        db.select({ id: products.id, options: products.options }).from(products).where(inArray(products.id, productIds)),
+      ])
+    : [[], []]
+  return rows.map((r) => ({
+    ...r,
+    store: storeRows.find((s) => s.id === r.storeId)!,
+    options: optionRows.find((o) => o.id === r.id)?.options ?? [],
+    variants: variantRows.filter((v) => v.productId === r.id),
+  }))
 }
 
 export type CartProduct = Awaited<ReturnType<typeof getCartProducts>>[number]
@@ -37,7 +53,7 @@ const orderSchema = z
   .object({
     storeId: z.uuid(),
     items: z
-      .array(z.object({ productId: z.uuid(), quantity: z.number().int().min(1).max(99) }))
+      .array(z.object({ productId: z.uuid(), variantId: z.uuid().optional(), quantity: z.number().int().min(1).max(99) }))
       .min(1, 'El carrito está vacío.')
       .max(50),
     customerName: z.string().trim().min(2, 'Escribí tu nombre.').max(80),
@@ -110,12 +126,27 @@ export async function createOrder(_prev: OrderState, formData: FormData): Promis
     .select()
     .from(products)
     .where(and(inArray(products.id, ids), eq(products.storeId, store.id)))
-  const lines = data.items.map((i) => ({ ...i, product: rows.find((r) => r.id === i.productId) }))
-  const missing = lines.filter((l) => !l.product || !l.product.isAvailable)
-  if (missing.length)
-    return { ok: false, message: 'Algunos productos ya no están disponibles. Revisá tu carrito.' }
+  const variantRows = ids.length ? await db.select().from(productVariants).where(inArray(productVariants.productId, ids)) : []
+  const resolved = data.items.map((i) => {
+    const product = rows.find((r) => r.id === i.productId)
+    if (!product || !product.isAvailable || product.kind !== 'PRODUCTO') return null
+    // Con opciones hay que traer una combinación válida y disponible de ese mismo producto.
+    const variant = i.variantId ? variantRows.find((v) => v.id === i.variantId && v.productId === product.id) : undefined
+    if (product.options.length > 0 ? !variant || !variant.isAvailable : i.variantId) return null
+    const label = variant ? variantLabel(variant.values) : ''
+    return {
+      quantity: i.quantity,
+      productId: product.id,
+      variantId: variant?.id ?? null,
+      variantLabel: label,
+      name: label ? `${product.name} · ${label}` : product.name,
+      unitPrice: variant?.price ?? product.price,
+    }
+  })
+  if (resolved.some((l) => l === null)) return { ok: false, message: 'Algunos productos o tallas ya no están disponibles. Revisá tu carrito.' }
+  const lines = resolved as NonNullable<(typeof resolved)[number]>[]
 
-  const subtotal = lines.reduce((sum, l) => sum + l.product!.price * l.quantity, 0)
+  const subtotal = lines.reduce((sum, l) => sum + l.unitPrice * l.quantity, 0)
 
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
@@ -138,13 +169,7 @@ export async function createOrder(_prev: OrderState, formData: FormData): Promis
           })
           .returning({ id: orders.id })
         await tx.insert(orderItems).values(
-          lines.map((l) => ({
-            orderId: order.id,
-            productId: l.product!.id,
-            name: l.product!.name,
-            unitPrice: l.product!.price,
-            quantity: l.quantity,
-          })),
+          lines.map((l) => ({ ...l, orderId: order.id })),
         )
         return order.id
       })

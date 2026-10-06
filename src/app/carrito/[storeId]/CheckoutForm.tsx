@@ -28,7 +28,7 @@ export function CheckoutForm({ store }: { store: StoreInfo }) {
 
   if (!cart.ready || lines === null) return <div className="shimmer" style={{ height: 320, borderRadius: 24 }} />
 
-  const mine = lines.filter((l) => l.storeId === store.id && l.product.isAvailable)
+  const mine = lines.filter((l) => l.storeId === store.id && l.available)
   if (mine.length === 0 && !state?.ok) {
     return (
       <div className="empty">
@@ -37,13 +37,13 @@ export function CheckoutForm({ store }: { store: StoreInfo }) {
       </div>
     )
   }
-  const total = mine.reduce((s, l) => s + l.product.price * l.quantity, 0)
+  const total = mine.reduce((s, l) => s + l.price * l.quantity, 0)
   const err = (k: string) => (state && !state.ok ? state.errors?.[k]?.[0] : undefined)
 
   return (
     <form onSubmit={onSubmit} className="two" noValidate>
       <input type="hidden" name="storeId" value={store.id} />
-      <input type="hidden" name="items" value={JSON.stringify(mine.map((l) => ({ productId: l.productId, quantity: l.quantity })))} />
+      <input type="hidden" name="items" value={JSON.stringify(mine.map((l) => ({ productId: l.productId, variantId: l.variant?.id, quantity: l.quantity })))} />
       <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px' }}>
         <label>No llenar <input name="website" tabIndex={-1} autoComplete="off" /></label>
       </div>
@@ -111,9 +111,9 @@ export function CheckoutForm({ store }: { store: StoreInfo }) {
         <h2 className="h3">Resumen</h2>
         <div>
           {mine.map((l) => (
-            <div key={l.productId} className="line">
-              <span>{l.quantity} × {l.product.name}</span>
-              <span className="tnum" style={{ whiteSpace: 'nowrap' }}>{formatPrice(l.product.price * l.quantity)}</span>
+            <div key={l.key} className="line">
+              <span>{l.quantity} × {l.product.name}{l.label ? ` · ${l.label}` : ''}</span>
+              <span className="tnum" style={{ whiteSpace: 'nowrap' }}>{formatPrice(l.price * l.quantity)}</span>
             </div>
           ))}
         </div>

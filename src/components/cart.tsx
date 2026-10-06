@@ -2,15 +2,20 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
-export type CartItem = { productId: string; storeId: string; quantity: number }
+/** Una línea del carrito: producto + (si tiene opciones) la combinación elegida. */
+export type CartItem = { productId: string; storeId: string; variantId?: string; quantity: number }
+
+/** Identificador de la línea: el mismo producto en dos colores son dos líneas. */
+export const lineKey = (i: { productId: string; variantId?: string | null }) => (i.variantId ? `${i.productId}:${i.variantId}` : i.productId)
 
 type CartContext = {
   items: CartItem[]
   ready: boolean
   count: number
   add: (item: Omit<CartItem, 'quantity'>, quantity?: number) => void
-  setQuantity: (productId: string, quantity: number) => void
-  remove: (productId: string) => void
+  /** `key` = lineKey(item) */
+  setQuantity: (key: string, quantity: number) => void
+  remove: (key: string) => void
   clearStore: (storeId: string) => void
   /** Aviso flotante ("agregado al carrito"). */
   toast: (message: string) => void
@@ -18,7 +23,7 @@ type CartContext = {
   bump: number
 }
 
-const KEY = 'f13_carrito_v1'
+const KEY = 'f13_carrito_v1' // sigue siendo compatible: las líneas viejas no tienen variantId
 const MAX_QTY = 99
 const Ctx = createContext<CartContext | null>(null)
 
@@ -71,21 +76,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
       add: (item, quantity = 1) => {
         setBump((b) => b + 1)
         commit((prev) => {
-          const found = prev.find((i) => i.productId === item.productId)
-          if (found)
-            return prev.map((i) =>
-              i.productId === item.productId ? { ...i, quantity: Math.min(MAX_QTY, i.quantity + quantity) } : i,
-            )
-          return [...prev, { ...item, quantity }]
+          const key = lineKey(item)
+          const found = prev.find((i) => lineKey(i) === key)
+          if (found) return prev.map((i) => (lineKey(i) === key ? { ...i, quantity: Math.min(MAX_QTY, i.quantity + quantity) } : i))
+          return [...prev, { productId: item.productId, storeId: item.storeId, ...(item.variantId ? { variantId: item.variantId } : {}), quantity }]
         })
       },
-      setQuantity: (productId, quantity) =>
+      setQuantity: (key, quantity) =>
         commit((prev) =>
           quantity <= 0
-            ? prev.filter((i) => i.productId !== productId)
-            : prev.map((i) => (i.productId === productId ? { ...i, quantity: Math.min(MAX_QTY, quantity) } : i)),
+            ? prev.filter((i) => lineKey(i) !== key)
+            : prev.map((i) => (lineKey(i) === key ? { ...i, quantity: Math.min(MAX_QTY, quantity) } : i)),
         ),
-      remove: (productId) => commit((prev) => prev.filter((i) => i.productId !== productId)),
+      remove: (key) => commit((prev) => prev.filter((i) => lineKey(i) !== key)),
       clearStore: (storeId) => commit((prev) => prev.filter((i) => i.storeId !== storeId)),
       toast,
       bump,

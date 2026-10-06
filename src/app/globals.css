@@ -586,3 +586,64 @@ img, svg { -webkit-user-drag: none; }
 .notif .lrow__s { white-space: normal; }
 .notif__d { font-size: 12px; color: var(--tinta-3); margin-top: 4px; }
 .notif__dot { width: 10px; height: 10px; margin-top: 6px; flex-shrink: 0; border-radius: 50%; background: var(--florece); box-shadow: 0 0 0 4px var(--tint-verde); }
+
+/* ---------- catálogo: categorías, tipo y opciones ---------- */
+.cchips { display: flex; flex-wrap: wrap; gap: 8px; }
+.cchip { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 0; background: var(--papel); color: var(--tinta-2); font: inherit; font-size: 14px; font-weight: 600; box-shadow: inset 0 0 0 1.5px var(--linea); cursor: pointer; transition: background .2s, color .2s, box-shadow .2s, transform .2s var(--spring); }
+.cchip:active { transform: scale(.95); }
+.cchip.on { background: var(--cemento); color: var(--hueso); box-shadow: none; }
+.cchip[disabled] { opacity: .45; cursor: not-allowed; }
+.cchip__main { font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 2px 6px; border-radius: 999px; background: var(--florece); color: #0D3B20; }
+.cchips[aria-invalid="true"] .cchip { box-shadow: inset 0 0 0 1.5px var(--error); }
+
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 6px; border-radius: 22px; background: var(--arena); }
+.seg button { display: grid; justify-items: start; gap: 2px; padding: 12px 14px; border: 0; border-radius: 16px; background: transparent; color: var(--tinta-2); font: inherit; font-weight: 800; font-size: 15px; text-align: left; cursor: pointer; transition: background .25s, color .25s, box-shadow .25s; }
+.seg button svg { margin-bottom: 4px; }
+.seg button small { font-weight: 500; font-size: 12px; color: var(--tinta-3); }
+.seg button.on { background: var(--papel); color: var(--cemento); box-shadow: var(--sh-1); }
+.seg button.on svg { color: var(--verde); }
+
+.vgroup { display: grid; gap: 10px; padding: 14px; border-radius: var(--r-md); background: var(--hueso); box-shadow: inset 0 0 0 1px var(--linea); }
+.vsugg { display: flex; flex-wrap: wrap; gap: 6px; }
+.vvals { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px; min-height: 52px; border-radius: 14px; background: var(--papel); box-shadow: inset 0 0 0 1.5px var(--linea); }
+.vval { display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px 4px 4px; border-radius: 999px; background: var(--arena); font-size: 14px; font-weight: 700; }
+.vval.on { box-shadow: 0 0 0 2px var(--verde); }
+.vval__img { width: 28px; height: 28px; display: grid; place-items: center; overflow: hidden; border: 0; border-radius: 50%; background: var(--papel); color: var(--tinta-3); cursor: pointer; padding: 0; }
+.vval__img img { width: 100%; height: 100%; object-fit: cover; }
+.vval__x { width: 22px; height: 22px; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; color: var(--tinta-3); cursor: pointer; }
+.vvals__in { flex: 1 1 140px; min-width: 120px; border: 0; outline: 0; background: transparent; font: inherit; font-size: 15px; padding: 6px; }
+.vpick { display: grid; gap: 8px; }
+.vpick__row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.vpick__img { flex-shrink: 0; width: 64px; height: 64px; padding: 0; overflow: hidden; border: 0; border-radius: 12px; cursor: pointer; box-shadow: var(--sh-1); }
+.vpick__img img { width: 100%; height: 100%; object-fit: cover; }
+.vpick__none { flex-shrink: 0; width: 64px; height: 64px; border: 1.5px dashed var(--linea); border-radius: 12px; background: var(--papel); font: inherit; font-size: 12px; font-weight: 700; color: var(--tinta-3); cursor: pointer; }
+.vtable { display: grid; gap: 6px; }
+.vtable__h, .vtable__r { display: grid; grid-template-columns: minmax(0, 1fr) 132px 56px; align-items: center; gap: 10px; }
+.vtable__h { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--tinta-3); padding: 0 4px; }
+.vtable__r { padding: 6px 8px 6px 12px; border-radius: 14px; background: var(--hueso); transition: opacity .2s; }
+.vtable__r.off { opacity: .55; }
+.vtable__l { font-weight: 700; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vtable__p .input { min-height: 40px; padding-block: 6px; }
+.chip-kind { padding: 2px 8px; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; background: var(--tint-turquesa); color: var(--turquesa-t); box-shadow: none; vertical-align: 1px; }
+.vsugg .pill { border: 0; font: inherit; font-size: 13px; min-height: 34px; cursor: pointer; }
+
+/* ---------- ficha: precio, opciones y servicios ---------- */
+.p-price { display: flex; align-items: baseline; gap: 8px; }
+.p-price__from, .price__from { font-family: var(--f-body); font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--tinta-3); }
+.p-price__from { font-size: 14px; }
+.opt { display: grid; gap: 8px; }
+.opt__t { font-size: 14px; font-weight: 600; color: var(--tinta-2); }
+.opt__t b { color: var(--cemento); }
+.opt__vals { display: flex; flex-wrap: wrap; gap: 8px; }
+.opt__v { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; min-width: 52px; justify-content: center; padding: 0 16px; border: 0; border-radius: 14px; background: var(--papel); color: var(--cemento); font: inherit; font-size: 15px; font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--linea); cursor: pointer; transition: box-shadow .2s, background .2s, transform .2s var(--spring); }
+.opt__v:active { transform: scale(.95); }
+.opt__v.on { box-shadow: inset 0 0 0 2.5px var(--cemento); }
+.opt__v.img { padding-left: 4px; }
+.opt__v img { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; }
+.opt__v.out { color: var(--tinta-3); background: transparent; }
+.opt__v.out span { text-decoration: line-through; text-decoration-thickness: 1.5px; }
+.chip-kind-lg { background: var(--tint-turquesa); color: var(--turquesa-t); box-shadow: none; }
+.prod__kind { position: absolute; top: 10px; left: 10px; z-index: 2; }
+.btn[aria-disabled="true"] { opacity: .5; pointer-events: none; }
+.prod__img .chip-dark { top: auto; bottom: 10px; }
+.cl__opt { display: block; margin-top: 2px; font-size: 13px; font-weight: 600; color: var(--tinta-3); }

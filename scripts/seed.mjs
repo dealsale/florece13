@@ -1,4 +1,4 @@
-// Datos base: las categorías del briefing. No crea tiendas ni productos de ejemplo.
+// Datos base: las categorías (productos y servicios). No crea tiendas ni productos de ejemplo.
 // Se puede correr varias veces sin duplicar.
 import postgres from 'postgres'
 
@@ -7,14 +7,32 @@ try {
   process.loadEnvFile()
 } catch {}
 
+// [slug, nombre, ícono]. El orden es el de los formularios. En el inicio solo aparecen las que tienen publicaciones.
 const CATEGORIES = [
   ['artesanias', 'Artesanías', 'artesania'],
   ['ropa', 'Ropa y streetwear', 'ropa'],
-  ['comida', 'Comida', 'comida'],
-  ['arte', 'Arte', 'arte'],
-  ['souvenirs', 'Souvenirs', 'souvenir'],
   ['accesorios', 'Accesorios', 'accesorio'],
-  ['servicios', 'Servicios', 'servicio'],
+  ['bolsos', 'Bolsos y mochilas', 'bolso'],
+  ['calzado', 'Calzado', 'zapato'],
+  ['joyeria', 'Joyería y bisutería', 'joya'],
+  ['arte', 'Arte y grafiti', 'arte'],
+  ['souvenirs', 'Souvenirs y recuerdos', 'souvenir'],
+  ['decoracion', 'Decoración y hogar', 'hogar'],
+  ['comida', 'Comida', 'comida'],
+  ['cafe', 'Café y bebidas', 'cafe'],
+  ['dulces', 'Dulces y postres', 'dulce'],
+  ['belleza', 'Belleza y cuidado', 'belleza'],
+  ['musica', 'Música', 'musica'],
+  ['libros', 'Libros y papelería', 'libro'],
+  ['ninos', 'Niños y juguetes', 'juguete'],
+  ['mascotas', 'Mascotas', 'mascota'],
+  ['plantas', 'Plantas y jardín', 'planta'],
+  ['experiencias', 'Experiencias y tours', 'experiencia'],
+  ['fotografia', 'Fotografía y video', 'camara'],
+  ['talleres', 'Talleres y clases', 'taller'],
+  ['eventos', 'Eventos y fiestas', 'evento'],
+  ['diseno', 'Diseño y estampado', 'diseno'],
+  ['servicios', 'Otros servicios', 'servicio'],
 ]
 
 const url = process.env.DATABASE_URL
