@@ -30,7 +30,7 @@ La vitrina digital de los comercios de la Comuna 13 de Medellín. Cada tienda de
 - Catálogo: productos y servicios. Crear, editar, borrar, marcar como agotado. Hasta 6 fotos, ordenables. Hasta 3 categorías. Opciones (hasta 2 grupos, 60 combinaciones) con foto por valor y precio/disponibilidad por combinación; al editar, las combinaciones conservan su id para no romper carritos. Las fotos se reducen en el celular antes de subirlas (ahorra datos) y el servidor las normaliza a WebP.
 - Pedidos: lista con filtros por estado, detalle, cambio de estado (el comprador lo ve en su link) y mensaje de WhatsApp prearmado para el cliente.
 - Mi tienda: logo, portada, historia, dirección, ubicación en el mapa, horario semanal y forma de entrega (envío nacional, domicilio en el barrio y/o recoger).
-- Publicar hoy (`/panel/hoy`): historias (foto o video hasta 40 MB, 24 h), ofertas Flash, eventos para la Agenda 13 y vacantes (30 días).
+- Publicar hoy (`/panel/hoy`): historias (foto de hasta 40 MB o video de hasta 300 MB, 24 h; el video se comprime en el servidor con ffmpeg a 720p H.264, máx. 60 s, normalmente 3–8 MB), ofertas Flash, eventos para la Agenda 13 y vacantes (30 días).
 - QR y sticker "Florece aquí" para imprimir o descargar.
 
 **Notificaciones** (`/panel/avisos`):

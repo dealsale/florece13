@@ -1,8 +1,8 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  // sharp y postgres corren solo en el servidor
-  serverExternalPackages: ['sharp', 'postgres'],
+  // sharp, postgres y ffmpeg corren solo en el servidor
+  serverExternalPackages: ['sharp', 'postgres', 'ffmpeg-static'],
   experimental: {
     // Las páginas ya visitadas se reusan 30 s al volver (atrás/adelante y pestañas se sienten instantáneas).
     // Los cambios del panel invalidan este caché con revalidatePath.

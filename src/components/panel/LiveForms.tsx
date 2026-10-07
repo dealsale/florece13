@@ -6,7 +6,7 @@ import type { FormState } from '@/lib/actions/merchant'
 import { EVENT_KINDS } from '@/lib/agenda'
 import { Icon } from '../Icon'
 import { SingleImageField } from '../ImageUploader'
-import { uploadMedia } from '../upload'
+import { uploadMedia, type UploadProgress } from '../upload'
 import { useSubmit } from '../useSubmit'
 
 /* Formularios de lo "en vivo": historia, Flash, evento y vacante. Cortos y pensados para el celular. */
@@ -66,6 +66,7 @@ function StoryForm() {
   const f = useLiveForm(createStory)
   const [media, setMedia] = useState<{ url: string; mediaType: 'image' | 'video' } | null>(null)
   const [busy, setBusy] = useState(false)
+  const [progress, setProgress] = useState<UploadProgress | null>(null)
   const [error, setError] = useState('')
   useEffect(() => {
     if (f.state?.ok) setMedia(null) // eslint-disable-line react-hooks/set-state-in-effect
@@ -74,7 +75,7 @@ function StoryForm() {
     <form key={f.key} ref={f.ref} onSubmit={f.onSubmit} className="card pad form" noValidate>
       <input type="hidden" name="mediaUrl" value={media?.url ?? ''} />
       <input type="hidden" name="mediaType" value={media?.mediaType ?? 'image'} />
-      <label className={`story-up${busy ? ' shimmer' : ''}`}>
+      <label className={`story-up${busy && !progress ? ' shimmer' : ''}`}>
         {media ? (
           media.mediaType === 'video' ? (
             <video src={media.url} muted playsInline autoPlay loop />
@@ -83,12 +84,20 @@ function StoryForm() {
             <img src={media.url} alt="" />
           )
         ) : (
-          !busy && (
+          !busy ? (
             <span className="story-up__e">
               <Icon name="camara" size={30} />
               <b>Tomá una foto o grabá un video</b>
-              <small>Vertical queda mejor. Video de hasta 40 MB.</small>
+              <small>Vertical queda mejor. Videos de hasta 60 s: los comprimimos para que carguen rápido.</small>
             </span>
+          ) : (
+            progress && (
+              <span className="story-up__e" role="status">
+                <b>{progress.phase === 'subiendo' ? `Subiendo video… ${Math.round(progress.pct * 100)}%` : 'Comprimiendo video…'}</b>
+                <span className="story-up__bar"><i style={{ width: `${Math.round(progress.pct * 100)}%` }} /></span>
+                <small>{progress.phase === 'subiendo' ? 'No cerrés esta pantalla.' : 'Lo dejamos liviano para que se vea rápido. Puede tardar un momento.'}</small>
+              </span>
+            )
           )
         )}
         <input
@@ -98,14 +107,17 @@ function StoryForm() {
           onChange={async (e) => {
             const file = e.target.files?.[0]
             if (!file) return
+            e.target.value = ''
             setBusy(true)
             setError('')
+            setProgress(null)
             try {
-              setMedia(await uploadMedia(file, 'historia'))
+              setMedia(await uploadMedia(file, 'historia', setProgress))
             } catch (err) {
               setError((err as Error).message)
             }
             setBusy(false)
+            setProgress(null)
           }}
         />
       </label>
