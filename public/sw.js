@@ -4,7 +4,7 @@
  * - Páginas: siempre de la red (precios, stock y sesión deben estar al día);
  *   sin conexión se muestra /offline.
  */
-const VERSION = 'f13-v4'
+const VERSION = 'f13-v5'
 const STATIC = `${VERSION}-static`
 const MEDIA = `${VERSION}-media`
 const OFFLINE = '/offline'

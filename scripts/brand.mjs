@@ -199,8 +199,16 @@ await icon(180, 0.12, `${ICONS}/apple-touch-icon.png`)
     .png()
     .toFile(`${ICONS}/badge-96.png`)
 }
-await icon(48, 0.04, `${ICONS}/favicon-48.png`)
-await icon(32, 0.02, `${ICONS}/favicon-32.png`)
+// Favicon de la pestaña del navegador: solo el 13, sin fondo (los íconos de la app siguen con fondo crema).
+async function favicon(size, file) {
+  await sharp(markPng)
+    .resize({ width: size, height: size, fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png({ compressionLevel: 9 })
+    .toFile(file)
+}
+await favicon(96, `${ICONS}/favicon-96.png`)
+await favicon(48, `${ICONS}/favicon-48.png`)
+await favicon(32, `${ICONS}/favicon-32.png`)
 
 // Versiones livianas para la web (WebP, el doble del tamaño en pantalla).
 const webp = (file, resize, out) => sharp(`${OUT}/${file}`).resize(resize).webp({ quality: 88, alphaQuality: 90 }).toFile(`${OUT}/${out}`)
