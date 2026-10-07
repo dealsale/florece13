@@ -11,6 +11,8 @@ import { artSrc, CATEGORY_COLORS } from '@/lib/art'
 import { getCurrentUser } from '@/lib/auth'
 import { getStoreBySlug, listProducts } from '@/lib/queries'
 import { isMobileRequest } from '@/lib/device'
+import { openStatus } from '@/lib/time'
+import { FollowButton } from '@/components/live/FollowButton'
 import { appUrl } from '@/lib/url'
 import { storeGreeting, waLink } from '@/lib/whatsapp'
 
@@ -42,6 +44,7 @@ export default async function StorePage({ params }: { params: Params }) {
   const products = await listProducts({ storeId: store.id, limit: 200, includeUnavailable: true, includeInactiveStore: preview })
   const cat = store.category
   const cats = store.categories.map((c) => c.category).sort((a, b) => (a.id === store.categoryId ? -1 : b.id === store.categoryId ? 1 : a.position - b.position))
+  const status = openStatus(store.hours)
   const goods = products.filter((p) => p.kind === 'PRODUCTO')
   const services = products.filter((p) => p.kind === 'SERVICIO')
   const sections = [
@@ -93,16 +96,24 @@ export default async function StorePage({ params }: { params: Params }) {
             {cats.map((c) => (
               <Link key={c.id} href={`/tiendas?cat=${c.slug}`} className="chip"><span className="dot" style={{ ['--c' as string]: CATEGORY_COLORS[c.slug] }} />{c.name}</Link>
             ))}
+            {status && <span className={`chip ${status.open ? 'chip-open' : 'chip-closed'}`}><i className="dotlive" />{status.label}</span>}
+            {store.delivers && <span className="chip"><Icon name="moto" size={14} /> Domicilio</span>}
             {store.sector && <span className="chip"><Icon name="ubicacion" size={14} /> {store.sector}, Comuna 13</span>}
             {store.shipsNationwide && <span className="chip"><Icon name="envio" size={14} /> Envíos a todo el país</span>}
           </div>
           <div className="s-actions">
+            {!preview && <FollowButton storeId={store.id} storeName={store.name} />}
             <a className="btn btn-wa" href={waLink(store.whatsapp, storeGreeting(store.name, appUrl(`/t/${store.slug}`), rich))} target="_blank" rel="noopener noreferrer">
               <Icon name="whatsapp" size={20} /> Escribir por WhatsApp
             </a>
             {store.instagram && (
               <a className="btn btn-light" href={`https://instagram.com/${store.instagram}`} target="_blank" rel="noopener noreferrer">
                 <Icon name="instagram" size={20} /> @{store.instagram}
+              </a>
+            )}
+            {store.lat != null && store.lng != null && (
+              <a className="btn btn-light" href={`https://www.google.com/maps/dir/?api=1&destination=${store.lat},${store.lng}`} target="_blank" rel="noopener noreferrer">
+                <Icon name="navegar" size={18} /> Cómo llegar
               </a>
             )}
             <ShareButton url={appUrl(`/t/${store.slug}`)} title={store.name} />

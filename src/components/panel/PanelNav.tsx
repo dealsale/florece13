@@ -7,6 +7,7 @@ import { Icon } from '../Icon'
 
 const LINKS = [
   { href: '/panel', label: 'Resumen', icon: 'inicio', exact: true, tour: 'nav-resumen' },
+  { href: '/panel/hoy', label: 'Publicar hoy', icon: 'rayo', tour: 'nav-hoy' },
   { href: '/panel/pedidos', label: 'Pedidos', icon: 'pedidos', tour: 'nav-pedidos' },
   { href: '/panel/avisos', label: 'Avisos', icon: 'campana', tour: 'nav-avisos' },
   { href: '/panel/productos', label: 'Catálogo', icon: 'florece', tour: 'nav-productos' },

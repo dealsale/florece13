@@ -1,12 +1,12 @@
 'use server'
 
-import { and, eq, inArray, notInArray } from 'drizzle-orm'
+import { and, count, eq, gt, inArray, notInArray } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { after } from 'next/server'
-import { notifyNewStore, safeNotify } from '@/lib/notify'
+import { notifyFollowers, notifyNewStore, safeNotify } from '@/lib/notify'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
-import { categories, db, orders, productCategories, productImages, products, productVariants, storeCategories, stores } from '@/db'
+import { categories, db, orders, productCategories, productImages, products, productVariants, storeCategories, stores, users } from '@/db'
 import type { ProductOption } from '@/db/schema'
 import { getStoreForUser, requireMerchant, requireUser } from '@/lib/auth'
 import { normalizePhone, slugify } from '@/lib/format'
@@ -103,6 +103,8 @@ export async function createStore(_prev: FormState, fd: FormData): Promise<FormS
     .values({ ...data, categoryId: cats[0], ownerId: user.id, slug: await uniqueSlug(data.name) })
     .returning({ id: stores.id })
   await setStoreCategories(created.id, cats)
+  // Un comprador con cuenta que abre su tienda pasa a ser comerciante.
+  if (user.role === 'CUSTOMER') await db.update(users).set({ role: 'MERCHANT' }).where(eq(users.id, user.id))
   after(() => safeNotify(() => notifyNewStore(created.id)))
   revalidatePath('/', 'layout')
   redirect('/panel?bienvenida=1')
@@ -115,7 +117,16 @@ const storeSettingsSchema = storeSchema.extend({
   coverUrl: optionalImage,
   shipsNationwide: z.boolean(),
   allowsPickup: z.boolean(),
+  delivers: z.boolean(),
+  lat: z.number().min(-90).max(90).nullable(),
+  lng: z.number().min(-180).max(180).nullable(),
+  hours: z
+    .array(z.object({ closed: z.boolean(), open: z.string().regex(/^\d{2}:\d{2}$/), close: z.string().regex(/^\d{2}:\d{2}$/) }))
+    .length(7)
+    .nullable(),
 })
+
+const coord = (v: string) => (v === '' || !Number.isFinite(Number(v)) ? null : Number(v))
 
 export async function updateStore(_prev: FormState, fd: FormData): Promise<FormState> {
   const { store } = await requireMerchant('/panel/tienda')
@@ -132,10 +143,23 @@ export async function updateStore(_prev: FormState, fd: FormData): Promise<FormS
     coverUrl: str(fd, 'coverUrl'),
     shipsNationwide: fd.get('shipsNationwide') === 'on',
     allowsPickup: fd.get('allowsPickup') === 'on',
+    delivers: fd.get('delivers') === 'on',
+    lat: coord(str(fd, 'lat')),
+    lng: coord(str(fd, 'lng')),
+    hours: (() => {
+      const raw = str(fd, 'hours')
+      if (!raw) return null
+      try {
+        return JSON.parse(raw)
+      } catch {
+        return undefined
+      }
+    })(),
   })
   if (!parsed.success) return { errors: z.flattenError(parsed.error).fieldErrors, message: 'Revisá los campos marcados.' }
-  if (!parsed.data.shipsNationwide && !parsed.data.allowsPickup)
-    return { message: 'Elegí al menos una forma de entrega: envío o recoger.' }
+  if (!parsed.data.shipsNationwide && !parsed.data.allowsPickup && !parsed.data.delivers)
+    return { message: 'Elegí al menos una forma de entrega: envío, domicilio o recoger.' }
+  if ((parsed.data.lat === null) !== (parsed.data.lng === null)) return { message: 'Revisá la ubicación en el mapa.' }
   const { categoryIds, ...data } = parsed.data
   const cats = await existingCategories(categoryIds)
   if (cats.length === 0) return { errors: { categoryIds: ['Elegí al menos una categoría.'] } }
@@ -291,6 +315,21 @@ export async function createProduct(_prev: FormState, fd: FormData): Promise<For
   if (!prep.data) return prep.state!
   const [product] = await db.insert(products).values({ ...prep.data, storeId: store.id }).returning({ id: products.id })
   await Promise.all([saveImages(product.id, prep.images), saveProductCategories(product.id, prep.cats), saveVariants(product.id, prep.variants)])
+  // A quien sigue la tienda: un solo aviso que se va actualizando ("publicó 3 productos nuevos").
+  after(() =>
+    safeNotify(async () => {
+      const [{ n }] = await db
+        .select({ n: count() })
+        .from(products)
+        .where(and(eq(products.storeId, store.id), gt(products.createdAt, new Date(Date.now() - 6 * 3600_000))))
+      await notifyFollowers(store.id, {
+        title: n > 1 ? `🌸 ${store.name} publicó ${n} cosas nuevas` : `🌸 ${store.name} publicó algo nuevo`,
+        body: prep.data.name,
+        url: `/t/${store.slug}`,
+        tag: `store-new-${store.id}`,
+      })
+    }),
+  )
   revalidatePath('/', 'layout')
   redirect('/panel/productos?creado=1')
 }

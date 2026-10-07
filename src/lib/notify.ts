@@ -1,7 +1,8 @@
 import 'server-only'
 import { and, count, eq, inArray, isNull } from 'drizzle-orm'
 import webpush from 'web-push'
-import { appSettings, db, notifications, orders, pushSubscriptions, stores, users } from '@/db'
+import { appSettings, db, devices, follows, notifications, orders, pushSubscriptions, stores, users } from '@/db'
+import { distanceM } from './geo'
 import { formatPrice } from './format'
 import { SITE_URL } from './url'
 
@@ -79,6 +80,62 @@ export async function notify(userIds: string[], n: Notice) {
       }
     }),
   )
+}
+
+/** Envía un push a un dispositivo. Devuelve 'gone' si el navegador ya no tiene esa suscripción. */
+async function sendPush(sub: { endpoint: string; p256dh: string; auth: string }, payload: object): Promise<'ok' | 'gone' | 'error'> {
+  const { publicKey, privateKey } = await getVapid()
+  try {
+    await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, JSON.stringify(payload), {
+      vapidDetails: { subject: process.env.VAPID_SUBJECT || SITE_URL, publicKey, privateKey },
+      TTL: 60 * 60 * 6,
+      urgency: 'normal',
+    })
+    return 'ok'
+  } catch (err) {
+    const status = (err as { statusCode?: number }).statusCode
+    if (status === 404 || status === 410) return 'gone'
+    console.error('push', status ?? '', (err as Error).message)
+    return 'error'
+  }
+}
+
+type DeviceRow = { id: string; endpoint: string | null; p256dh: string | null; auth: string | null }
+async function pushDevices(rows: DeviceRow[], payload: object) {
+  await Promise.all(
+    rows.map(async (d) => {
+      if (!d.endpoint || !d.p256dh || !d.auth) return
+      if ((await sendPush({ endpoint: d.endpoint, p256dh: d.p256dh, auth: d.auth }, payload)) === 'gone')
+        await db.update(devices).set({ endpoint: null, p256dh: null, auth: null, nearDeals: false }).where(eq(devices.id, d.id))
+    }),
+  )
+}
+
+/** Avisa a los celulares que siguen a la tienda (compradores sin cuenta). */
+export async function notifyFollowers(storeId: string, n: { title: string; body: string; url: string; tag?: string }) {
+  const rows = await db
+    .select({ id: devices.id, endpoint: devices.endpoint, p256dh: devices.p256dh, auth: devices.auth })
+    .from(follows)
+    .innerJoin(devices, eq(devices.id, follows.deviceId))
+    .where(eq(follows.storeId, storeId))
+  await pushDevices(rows, { ...n, tag: n.tag ?? `store-${storeId}` })
+}
+
+/** "Avisarme de ofertas cerca": push a quien la activó y está dentro de su radio (y no sigue ya a la tienda). */
+export async function notifyNearDeal(storeId: string, dealId: string) {
+  const [store] = await db.select({ name: stores.name, lat: stores.lat, lng: stores.lng }).from(stores).where(eq(stores.id, storeId))
+  if (!store || store.lat == null || store.lng == null) return
+  const [deal] = await db.query.deals.findMany({ where: (d, { eq: e }) => e(d.id, dealId), limit: 1 })
+  if (!deal) return
+  const followers = new Set((await db.select({ id: follows.deviceId }).from(follows).where(eq(follows.storeId, storeId))).map((f) => f.id))
+  const near = (await db.select().from(devices).where(eq(devices.nearDeals, true))).filter(
+    (d) => !followers.has(d.id) && d.lat != null && d.lng != null && distanceM({ lat: d.lat, lng: d.lng }, { lat: store.lat!, lng: store.lng! }) <= d.radiusM,
+  )
+  const off = deal.originalPrice ? ` (antes ${formatPrice(deal.originalPrice)})` : ''
+  for (const d of near) {
+    const m = Math.round(distanceM({ lat: d.lat!, lng: d.lng! }, { lat: store.lat, lng: store.lng }) / 10) * 10
+    await pushDevices([d], { title: `⚡ Cerca de ti: ${deal.title}`, body: `${store.name} · ${formatPrice(deal.price)}${off} · a ${m < 1000 ? `${m} m` : `${(m / 1000).toFixed(1)} km`}`, url: `/ofertas#${deal.id}`, tag: `deal-${deal.id}` })
+  }
 }
 
 /** Nunca dejar que un aviso tumbe la acción principal (crear un pedido, aprobar una tienda…). */

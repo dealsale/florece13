@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { saveImage, UploadError, type UploadKind } from '@/lib/storage'
+import { saveImage, saveVideo, UploadError, VIDEO_TYPES, type UploadKind } from '@/lib/storage'
 
-const KINDS: UploadKind[] = ['producto', 'logo', 'portada']
+const KINDS: UploadKind[] = ['producto', 'logo', 'portada', 'historia']
 
 export async function POST(request: Request) {
   const user = await getCurrentUser()
@@ -20,8 +20,10 @@ export async function POST(request: Request) {
   if (!(file instanceof File)) return NextResponse.json({ error: 'No recibimos la foto.' }, { status: 400 })
 
   try {
+    // Las historias aceptan video corto; todo lo demás es foto.
+    if (kind === 'historia' && VIDEO_TYPES[file.type]) return NextResponse.json({ url: await saveVideo(file, user.id), mediaType: 'video' })
     const url = await saveImage(file, kind, user.id)
-    return NextResponse.json({ url })
+    return NextResponse.json({ url, mediaType: 'image' })
   } catch (err) {
     if (err instanceof UploadError) return NextResponse.json({ error: err.message }, { status: 400 })
     console.error('upload', err)

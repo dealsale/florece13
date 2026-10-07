@@ -1,6 +1,7 @@
 import { relations, sql } from 'drizzle-orm'
 import {
   boolean,
+  doublePrecision,
   index,
   integer,
   jsonb,
@@ -13,7 +14,8 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core'
 
-export const userRole = pgEnum('user_role', ['MERCHANT', 'ADMIN'])
+/** CUSTOMER: comprador con cuenta (opcional; comprar no exige cuenta). */
+export const userRole = pgEnum('user_role', ['MERCHANT', 'ADMIN', 'CUSTOMER'])
 export const storeStatus = pgEnum('store_status', ['PENDING', 'ACTIVE', 'SUSPENDED'])
 /** Ruta de pedido que elige el comerciante. CHECKOUT queda listo para cuando se conecte la pasarela. */
 export const orderMode = pgEnum('order_mode', ['WHATSAPP', 'CHECKOUT'])
@@ -34,6 +36,9 @@ export const productKind = pgEnum('product_kind', ['PRODUCTO', 'SERVICIO'])
  * Opciones de un producto (máx. 2 grupos), p. ej. [{ name: 'Color', values: [{ v: 'Negro', img: '/media/…' }] }, { name: 'Talla', values: [{ v: 'M' }] }].
  * `img` es una de las fotos del producto: al elegir ese valor, la galería muestra esa foto.
  */
+/** 7 días (0 = lunes). Cada día: cerrado o de `open` a `close` ("08:00"–"20:00"; si close < open, cierra pasada la medianoche). */
+export type StoreHours = { closed: boolean; open: string; close: string }[]
+
 export type ProductOption = { name: string; values: { v: string; img?: string | null }[] }
 
 const timestamps = {
@@ -52,6 +57,10 @@ export const users = pgTable(
     passwordHash: text('password_hash').notNull(),
     name: text('name').notNull(),
     role: userRole('role').notNull().default('MERCHANT'),
+    /** Datos del comprador para autocompletar el pedido. */
+    phone: text('phone').notNull().default(''),
+    city: text('city').notNull().default(''),
+    address: text('address').notNull().default(''),
     ...timestamps,
   },
   (t) => [uniqueIndex('users_email_idx').on(sql`lower(${t.email})`)],
@@ -77,6 +86,8 @@ export const categories = pgTable('categories', {
   name: text('name').notNull(),
   /** Nombre del ícono de la UI (ver components/Icon). */
   icon: text('icon').notNull(),
+  /** Universo al que pertenece: comprar, comer, servicios, experiencias (ver lib/universes). */
+  universe: text('universe').notNull().default('comprar'),
   position: integer('position').notNull().default(0),
 })
 
@@ -102,6 +113,13 @@ export const stores = pgTable(
     address: text('address').notNull().default(''),
     logoUrl: text('logo_url'),
     coverUrl: text('cover_url'),
+    /** Ubicación en el mapa (la marca el comerciante). */
+    lat: doublePrecision('lat'),
+    lng: doublePrecision('lng'),
+    /** Horario semanal, lunes a domingo; null = no lo publicó. */
+    hours: jsonb('hours').$type<StoreHours>(),
+    /** Hace domicilios en el barrio. */
+    delivers: boolean('delivers').notNull().default(false),
     shipsNationwide: boolean('ships_nationwide').notNull().default(true),
     allowsPickup: boolean('allows_pickup').notNull().default(true),
     orderMode: orderMode('order_mode').notNull().default('WHATSAPP'),
@@ -207,6 +225,8 @@ export const orders = pgTable(
     storeId: uuid('store_id')
       .notNull()
       .references(() => stores.id, { onDelete: 'cascade' }),
+    /** Si el comprador tenía cuenta al pedir (opcional). */
+    customerUserId: uuid('customer_user_id').references(() => users.id, { onDelete: 'set null' }),
     customerName: text('customer_name').notNull(),
     customerPhone: text('customer_phone').notNull(),
     customerEmail: text('customer_email').notNull().default(''),
@@ -244,6 +264,147 @@ export const orderItems = pgTable(
   (t) => [index('order_items_order_idx').on(t.orderId)],
 )
 
+/** Florece Flash: ofertas que duran poco (1 hora, 3 horas, hoy). */
+export const deals = pgTable(
+  'deals',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    storeId: uuid('store_id')
+      .notNull()
+      .references(() => stores.id, { onDelete: 'cascade' }),
+    productId: uuid('product_id').references(() => products.id, { onDelete: 'set null' }),
+    title: text('title').notNull(),
+    description: text('description').notNull().default(''),
+    imageUrl: text('image_url'),
+    price: integer('price').notNull(),
+    originalPrice: integer('original_price'),
+    startsAt: timestamp('starts_at', { withTimezone: true }).notNull().defaultNow(),
+    endsAt: timestamp('ends_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('deals_ends_idx').on(t.endsAt), index('deals_store_idx').on(t.storeId)],
+)
+
+/** Eventos: freestyle, talleres abiertos, conciertos, ferias… */
+export const events = pgTable(
+  'events',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    storeId: uuid('store_id')
+      .notNull()
+      .references(() => stores.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    description: text('description').notNull().default(''),
+    imageUrl: text('image_url'),
+    startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
+    endsAt: timestamp('ends_at', { withTimezone: true }),
+    /** Dónde (si no, la dirección de la tienda). */
+    place: text('place').notNull().default(''),
+    /** null = entrada libre. */
+    price: integer('price'),
+    /** musica | arte | deportes | baile | talleres | gastronomia | ferias | otros (ver lib/agenda). */
+    category: text('category').notNull().default('otros'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('events_starts_idx').on(t.startsAt), index('events_store_idx').on(t.storeId)],
+)
+
+/** Empleo: lo que los negocios de la 13 están buscando. */
+export const jobs = pgTable(
+  'jobs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    storeId: uuid('store_id')
+      .notNull()
+      .references(() => stores.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    description: text('description').notNull().default(''),
+    /** Tiempo completo, medio tiempo, por días, por proyecto. */
+    schedule: text('schedule').notNull().default(''),
+    pay: text('pay').notNull().default(''),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('jobs_expires_idx').on(t.expiresAt), index('jobs_store_idx').on(t.storeId)],
+)
+
+/**
+ * "Busco trabajo": perfiles de gente del barrio. Se publican sin cuenta (el navegador guarda la clave
+ * para editarlos) y solo los ven los negocios registrados.
+ */
+export const talentProfiles = pgTable(
+  'talent_profiles',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    name: text('name').notNull(),
+    trade: text('trade').notNull(),
+    about: text('about').notNull().default(''),
+    sector: text('sector').notNull().default(''),
+    availability: text('availability').notNull().default(''),
+    whatsapp: text('whatsapp').notNull(),
+    /** SHA-256 de la clave de edición que queda en el celular de quien publicó. */
+    editTokenHash: text('edit_token_hash').notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('talent_expires_idx').on(t.expiresAt)],
+)
+
+/** Historias: foto o video corto que el negocio publica y se ve durante 24 horas. */
+export const stories = pgTable(
+  'stories',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    storeId: uuid('store_id')
+      .notNull()
+      .references(() => stores.id, { onDelete: 'cascade' }),
+    mediaUrl: text('media_url').notNull(),
+    /** image | video */
+    mediaType: text('media_type').notNull().default('image'),
+    caption: text('caption').notNull().default(''),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('stories_expires_idx').on(t.expiresAt), index('stories_store_idx').on(t.storeId)],
+)
+
+/**
+ * Dispositivos de compradores (sin cuenta): el id lo genera el navegador y lo guarda.
+ * Sirve para seguir negocios y para "Avisarme de ofertas cerca" (push + ubicación aproximada).
+ */
+export const devices = pgTable(
+  'devices',
+  {
+    id: uuid('id').primaryKey(),
+    endpoint: text('endpoint'),
+    p256dh: text('p256dh'),
+    auth: text('auth'),
+    lat: doublePrecision('lat'),
+    lng: doublePrecision('lng'),
+    /** Avisar de ofertas Flash dentro de este radio. */
+    nearDeals: boolean('near_deals').notNull().default(false),
+    radiusM: integer('radius_m').notNull().default(1500),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('devices_endpoint_idx').on(t.endpoint)],
+)
+
+/** Negocios que sigue cada dispositivo. */
+export const follows = pgTable(
+  'follows',
+  {
+    deviceId: uuid('device_id')
+      .notNull()
+      .references(() => devices.id, { onDelete: 'cascade' }),
+    storeId: uuid('store_id')
+      .notNull()
+      .references(() => stores.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.deviceId, t.storeId] }), index('follows_store_idx').on(t.storeId)],
+)
+
 export const usersRelations = relations(users, ({ one }) => ({
   store: one(stores, { fields: [users.id], references: [stores.ownerId] }),
 }))
@@ -254,6 +415,24 @@ export const storesRelations = relations(stores, ({ one, many }) => ({
   categories: many(storeCategories),
   products: many(products),
   orders: many(orders),
+  deals: many(deals),
+  events: many(events),
+  jobs: many(jobs),
+  stories: many(stories),
+}))
+
+export const dealsRelations = relations(deals, ({ one }) => ({
+  store: one(stores, { fields: [deals.storeId], references: [stores.id] }),
+  product: one(products, { fields: [deals.productId], references: [products.id] }),
+}))
+export const eventsRelations = relations(events, ({ one }) => ({
+  store: one(stores, { fields: [events.storeId], references: [stores.id] }),
+}))
+export const jobsRelations = relations(jobs, ({ one }) => ({
+  store: one(stores, { fields: [jobs.storeId], references: [stores.id] }),
+}))
+export const storiesRelations = relations(stories, ({ one }) => ({
+  store: one(stores, { fields: [stories.storeId], references: [stores.id] }),
 }))
 
 /** Suscripciones de notificaciones push: una por navegador/celular donde el usuario las activó. */
@@ -343,3 +522,7 @@ export type ProductVariant = typeof productVariants.$inferSelect
 export type Order = typeof orders.$inferSelect
 export type OrderItem = typeof orderItems.$inferSelect
 export type Notification = typeof notifications.$inferSelect
+export type Deal = typeof deals.$inferSelect
+export type Event = typeof events.$inferSelect
+export type Job = typeof jobs.$inferSelect
+export type Story = typeof stories.$inferSelect

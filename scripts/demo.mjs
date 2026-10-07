@@ -83,6 +83,43 @@ const STORES = [
       ['Mini mural enmarcado', 95000, null, 'Pintura original 20 × 20 cm con marco en madera.'],
     ],
   },
+  {
+    email: `comida@${DOMAIN}`,
+    owner: 'Gloria Restrepo',
+    slug: 'arepas-dona-gloria',
+    name: 'Arepas Doña Gloria',
+    tagline: 'Arepas de chócolo y rellenas, recién hechas en el fogón',
+    category: 'comida',
+    sector: 'Las Independencias II',
+    story: 'Hace 22 años que hago arepas en esta esquina. Las de chócolo las muelo yo misma cada mañana.\n\nSi pasás por las escaleras, te huele a arepa: esa soy yo.',
+    instagram: '',
+    whatsapp: '573000000004',
+    products: [
+      ['Arepa de chócolo con quesito', 9000, null, 'Chócolo molido en casa, quesito campesino y mantequilla.'],
+      ['Arepa rellena de carne y queso', 14000, null, 'Bien cargada, para el almuerzo.'],
+      ['Combo 2 arepas + gaseosa', 22000, 26000, 'Dos arepas de chócolo con queso y una gaseosa personal.'],
+      ['Chocolate en leche', 5000, null, 'De olla, con canela.'],
+    ],
+  },
+  {
+    email: `barberia@${DOMAIN}`,
+    owner: 'Kevin Mosquera',
+    slug: 'barberia-el-parce',
+    name: 'Barbería El Parce',
+    tagline: 'Cortes, barba y diseños con flow de la 13',
+    category: 'barberias',
+    sector: '20 de Julio',
+    story: 'Arranqué cortándoles el pelo a los parceros del barrio en la terraza. Hoy tenemos tres sillas y la mejor música de la cuadra.',
+    instagram: 'barberiaelparce',
+    whatsapp: '573000000005',
+    kind: 'SERVICIO',
+    products: [
+      ['Corte clásico', 18000, null, 'Corte a máquina y tijera, lavado incluido.'],
+      ['Corte + barba', 25000, 30000, 'Corte completo, perfilado y toalla caliente.'],
+      ['Diseño o rayitas', 8000, null, 'Agregalo a tu corte.'],
+      ['Corte niños', 14000, null, 'Hasta los 12 años.'],
+    ],
+  },
 ]
 
 const CUSTOMERS = [
@@ -176,6 +213,102 @@ async function setVariants(productId, options, priceFn = () => null, off = []) {
       values (${productId}, ${sql.json(values)}, ${priceFn(values)}, ${!off.includes(values.join(' / '))}, ${position})`
 }
 
+/*
+ * Mapa, horario y lo "en vivo" (Flash, eventos, vacantes, historias) para que las tiendas de prueba
+ * muestren todo. Solo completa lo que falta: si una oferta o historia ya venció, crea otra.
+ */
+const WEEK = (open, close, sunday = [open, close]) =>
+  Array.from({ length: 7 }, (_, i) => (i === 6 ? (sunday ? { closed: false, open: sunday[0], close: sunday[1] } : { closed: true, open, close }) : { closed: false, open, close }))
+const LIVE = {
+  'ladera-streetwear': {
+    geo: [6.2592, -75.6203],
+    hours: WEEK('09:00', '19:00', ['10:00', '16:00']),
+    deal: { title: 'Camiseta Ladera a precio de barrio', price: 55000, originalPrice: 69900, hours: 3 },
+    event: { title: 'Taller abierto de serigrafía', category: 'talleres', inDays: 2, hour: 15, price: null, place: 'Terraza de Ladera Streetwear' },
+    story: ['Nueva tanda de camisetas recién estampadas', ['#17BEBB', '#1F1D1B', '#FF8A00']],
+  },
+  'tejidos-dona-amparo': {
+    geo: [6.2553, -75.6188],
+    hours: WEEK('08:00', '18:00', null),
+    story: ['Tejiendo la mochila de esta semana', ['#E5379B', '#FF8A00', '#2ECC71']],
+  },
+  'recuerdos-del-salado': {
+    geo: [6.2501, -75.6232],
+    hours: WEEK('10:00', '18:00', ['10:00', '17:00']),
+    event: { title: 'Freestyle en el mirador', category: 'musica', inDays: 1, hour: 19, price: null, place: 'Mirador de El Salado' },
+  },
+  'arepas-dona-gloria': {
+    geo: [6.2546, -75.6196],
+    hours: WEEK('07:00', '21:00', ['07:00', '21:00']),
+    delivers: true,
+    categories: ['comida', 'restaurantes'],
+    deal: { title: '2 arepas + gaseosa', price: 18000, originalPrice: 26000, hours: 1 },
+    story: ['Acaban de salir las arepas de chócolo', ['#FF8A00', '#F2C94C', '#9C4A2F']],
+  },
+  'barberia-el-parce': {
+    geo: [6.2569, -75.6165],
+    hours: WEEK('09:00', '20:00', null),
+    categories: ['barberias'],
+    deal: { title: 'Corte + barba', price: 22000, originalPrice: 30000, hours: 3 },
+    job: { title: 'Se busca barbero', schedule: 'Fines de semana', pay: 'Por porcentaje + propinas', description: 'Que sepa de degradados y barba. Buen ambiente y clientela fija.' },
+    story: ['Hoy hay cupos hasta las 8', ['#6B5BD2', '#1F1D1B', '#17BEBB']],
+  },
+}
+
+async function storyImage(ownerId, colors) {
+  if (process.env.STORAGE_DRIVER === 's3') return null
+  const { default: sharp } = await import('sharp')
+  const { mkdir, writeFile } = await import('node:fs/promises')
+  const path = await import('node:path')
+  const { randomUUID } = await import('node:crypto')
+  const [a, b, c] = colors
+  const dots = Array.from({ length: 14 }, (_, i) => `<circle cx="${(i * 173) % 1080}" cy="${300 + ((i * 311) % 1400)}" r="${60 + ((i * 37) % 120)}" fill="${[a, c, '#F7F3EE'][i % 3]}" opacity="${0.5 + (i % 4) / 10}"/>`).join('')
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs><rect width="1080" height="1920" fill="url(#g)"/>${dots}</svg>`
+  const dir = path.resolve(process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads'))
+  const key = `historia/${ownerId}/${randomUUID()}.webp`
+  await mkdir(path.dirname(path.join(dir, key)), { recursive: true })
+  await writeFile(path.join(dir, key), await sharp(Buffer.from(svg)).webp({ quality: 80 }).toBuffer())
+  return `/media/${key}`
+}
+
+async function liveExtras(storeId, s, ownerId) {
+  const x = LIVE[s.slug]
+  if (!x) return
+  const cats = Object.fromEntries((await sql`select id, slug from categories`).map((c) => [c.slug, c.id]))
+  for (const slug of x.categories ?? [])
+    if (cats[slug]) await sql`insert into store_categories (store_id, category_id) values (${storeId}, ${cats[slug]}) on conflict do nothing`
+  await sql`insert into product_categories (product_id, category_id) select id, category_id from products where store_id = ${storeId} and category_id is not null on conflict do nothing`
+  await sql`update stores set lat = ${x.geo[0]}, lng = ${x.geo[1]} where id = ${storeId} and lat is null`
+  await sql`update stores set hours = ${sql.json(x.hours)} where id = ${storeId} and hours is null`
+  if (x.delivers) await sql`update stores set delivers = true where id = ${storeId}`
+  if (x.deal) {
+    const [active] = await sql`select 1 from deals where store_id = ${storeId} and ends_at > now()`
+    if (!active)
+      await sql`insert into deals (store_id, title, price, original_price, ends_at) values (${storeId}, ${x.deal.title}, ${x.deal.price}, ${x.deal.originalPrice}, ${new Date(Date.now() + x.deal.hours * 3600000)})`
+  }
+  if (x.event) {
+    const [future] = await sql`select 1 from events where store_id = ${storeId} and starts_at > now()`
+    if (!future) {
+      const d = new Date(Date.now() + x.event.inDays * DAY)
+      // hora de Colombia (UTC−5)
+      const starts = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), x.event.hour + 5, 0))
+      await sql`insert into events (store_id, title, category, starts_at, place, price) values (${storeId}, ${x.event.title}, ${x.event.category}, ${starts}, ${x.event.place}, ${x.event.price})`
+    }
+  }
+  if (x.job) {
+    const [open] = await sql`select 1 from jobs where store_id = ${storeId} and expires_at > now()`
+    if (!open)
+      await sql`insert into jobs (store_id, title, schedule, pay, description, expires_at) values (${storeId}, ${x.job.title}, ${x.job.schedule}, ${x.job.pay}, ${x.job.description}, ${new Date(Date.now() + 30 * DAY)})`
+  }
+  if (x.story) {
+    const [live] = await sql`select 1 from stories where store_id = ${storeId} and expires_at > now()`
+    if (!live) {
+      const url = await storyImage(ownerId, x.story[1])
+      if (url) await sql`insert into stories (store_id, media_url, media_type, caption, expires_at) values (${storeId}, ${url}, 'image', ${x.story[0]}, ${new Date(Date.now() + DAY)})`
+    }
+  }
+}
+
 async function extras(storeId, s, cats) {
   const x = EXTRAS[s.slug]
   if (!x) return
@@ -228,8 +361,8 @@ async function seed() {
     if (productCount === 0) {
       for (const [pi, [name, price, compare, description]] of s.products.entries()) {
         const [p] = await sql`
-          insert into products (store_id, category_id, name, description, price, compare_at_price, is_available, created_at)
-          values (${store.id}, ${categoryId}, ${name}, ${description}, ${price}, ${compare}, ${pi !== 3 || si !== 2}, ${new Date(now - (9 - si) * DAY + pi * 3600000)})
+          insert into products (store_id, category_id, kind, name, description, price, compare_at_price, is_available, created_at)
+          values (${store.id}, ${categoryId}, ${s.kind ?? 'PRODUCTO'}, ${name}, ${description}, ${price}, ${compare}, ${pi !== 3 || si !== 2}, ${new Date(now - (9 - si) * DAY + pi * 3600000)})
           returning id, name, price`
         productRows.push(p)
       }
@@ -251,9 +384,10 @@ async function seed() {
       }
     }
     await extras(store.id, s, cats)
+    await liveExtras(store.id, s, user.id)
     console.log(`✔ ${s.name}  →  ${s.email}`)
   }
-  console.log(`Tiendas de prueba listas. Clave de las 3 cuentas: ${PASSWORD}`)
+  console.log(`Tiendas de prueba listas. Clave de las cuentas: ${PASSWORD}`)
 }
 
 try {

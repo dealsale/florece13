@@ -22,6 +22,27 @@
       "when": 1791252227168,
       "tag": "0002_productos_servicios_variantes",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791339127250,
+      "tag": "0003_universos_mapa_flash",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791339224190,
+      "tag": "0004_agenda_talento",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791339988090,
+      "tag": "0005_cuentas_clientes",
+      "breakpoints": true
     }
   ]
 }

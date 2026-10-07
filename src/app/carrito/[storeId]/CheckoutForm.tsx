@@ -7,19 +7,22 @@ import { Icon } from '@/components/Icon'
 import { formatPrice } from '@/lib/format'
 import { createOrder, type OrderState } from '../actions'
 import { useCartProducts } from '../useCartProducts'
+import { rememberOrder } from '@/components/live/myOrders'
 import { useSubmit } from '@/components/useSubmit'
 
-type StoreInfo = { id: string; name: string; slug: string; shipsNationwide: boolean; allowsPickup: boolean; sector: string; address: string }
+type StoreInfo = { id: string; name: string; slug: string; shipsNationwide: boolean; allowsPickup: boolean; delivers: boolean; sector: string; address: string }
+type Customer = { name: string; phone: string; city: string; address: string; email: string } | null
 
-export function CheckoutForm({ store }: { store: StoreInfo }) {
+export function CheckoutForm({ store, customer }: { store: StoreInfo; customer: Customer }) {
   const router = useRouter()
   const { cart, lines } = useCartProducts()
   const [state, action, pending] = useActionState<OrderState, FormData>(createOrder, null)
   const onSubmit = useSubmit(action)
-  const [delivery, setDelivery] = useState<'ENVIO' | 'RECOGER'>(store.shipsNationwide ? 'ENVIO' : 'RECOGER')
+  const [delivery, setDelivery] = useState<'ENVIO' | 'RECOGER'>(store.shipsNationwide || store.delivers ? 'ENVIO' : 'RECOGER')
 
   useEffect(() => {
     if (state?.ok) {
+      rememberOrder(state.orderId)
       cart.clearStore(store.id)
       router.replace(`/pedido/${state.orderId}?nuevo=1`)
     }
@@ -52,30 +55,34 @@ export function CheckoutForm({ store }: { store: StoreInfo }) {
         <h2 className="h3">Tus datos</h2>
         <div className="field">
           <label htmlFor="customerName">Nombre</label>
-          <input id="customerName" name="customerName" className="input" autoComplete="name" required aria-invalid={Boolean(err('customerName'))} />
+          <input id="customerName" name="customerName" className="input" autoComplete="name" required defaultValue={customer?.name} aria-invalid={Boolean(err('customerName'))} />
           {err('customerName') && <span className="ferr">{err('customerName')}</span>}
         </div>
         <div className="field">
           <label htmlFor="customerPhone">Celular (WhatsApp)</label>
           <div className="prefix">
             <span>+57</span>
-            <input id="customerPhone" name="customerPhone" className="input" inputMode="tel" autoComplete="tel-national" placeholder="300 123 4567" required aria-invalid={Boolean(err('customerPhone'))} />
+            <input id="customerPhone" name="customerPhone" className="input" inputMode="tel" autoComplete="tel-national" placeholder="300 123 4567" required defaultValue={customer?.phone} aria-invalid={Boolean(err('customerPhone'))} />
           </div>
           <span className="hint">La tienda te escribe aquí para confirmar. Si estás fuera de Colombia, escribí el número con el código de tu país.</span>
           {err('customerPhone') && <span className="ferr">{err('customerPhone')}</span>}
         </div>
         <div className="field">
           <label htmlFor="customerEmail">Correo <span className="muted" style={{ fontWeight: 500 }}>(opcional)</span></label>
-          <input id="customerEmail" name="customerEmail" type="email" className="input" autoComplete="email" aria-invalid={Boolean(err('customerEmail'))} />
+          <input id="customerEmail" name="customerEmail" type="email" className="input" autoComplete="email" defaultValue={customer?.email} aria-invalid={Boolean(err('customerEmail'))} />
           {err('customerEmail') && <span className="ferr">{err('customerEmail')}</span>}
         </div>
 
         <h2 className="h3" style={{ marginTop: 6 }}>Entrega</h2>
         <div className="choices" role="radiogroup">
-          {store.shipsNationwide && (
+          {(store.shipsNationwide || store.delivers) && (
             <label className="choice">
               <input type="radio" name="deliveryMethod" value="ENVIO" checked={delivery === 'ENVIO'} onChange={() => setDelivery('ENVIO')} />
-              <span><strong>Envío</strong><br /><span className="small muted">A cualquier ciudad del país</span></span>
+              <span>
+                <strong>{store.shipsNationwide ? 'Envío' : 'Domicilio'}</strong>
+                <br />
+                <span className="small muted">{store.shipsNationwide && store.delivers ? 'Domicilio en el barrio o envío a todo el país' : store.shipsNationwide ? 'A cualquier ciudad del país' : 'En la Comuna 13 y Medellín'}</span>
+              </span>
             </label>
           )}
           {store.allowsPickup && (
@@ -89,12 +96,12 @@ export function CheckoutForm({ store }: { store: StoreInfo }) {
           <>
             <div className="field">
               <label htmlFor="city">Ciudad</label>
-              <input id="city" name="city" className="input" autoComplete="address-level2" aria-invalid={Boolean(err('city'))} />
+              <input id="city" name="city" className="input" autoComplete="address-level2" defaultValue={customer?.city || (!store.shipsNationwide && store.delivers ? 'Medellín' : '')} aria-invalid={Boolean(err('city'))} />
               {err('city') && <span className="ferr">{err('city')}</span>}
             </div>
             <div className="field">
               <label htmlFor="address">Dirección</label>
-              <input id="address" name="address" className="input" autoComplete="street-address" placeholder="Calle, número, apto, barrio" aria-invalid={Boolean(err('address'))} />
+              <input id="address" name="address" className="input" autoComplete="street-address" defaultValue={customer?.address} placeholder="Calle, número, apto, barrio" aria-invalid={Boolean(err('address'))} />
               {err('address') && <span className="ferr">{err('address')}</span>}
             </div>
           </>
@@ -127,6 +134,12 @@ export function CheckoutForm({ store }: { store: StoreInfo }) {
           {pending ? 'Guardando pedido…' : <>Continuar al WhatsApp <Icon name="flecha" size={18} /></>}
         </button>
         <p className="small muted">Guardamos tu pedido y te llevamos al chat con la tienda para enviarlo.</p>
+        {!customer && (
+          <p className="small muted">
+            No necesitás cuenta. Si querés ver tus pedidos después,{' '}
+            <Link href={`/registro?tipo=cliente&next=${encodeURIComponent(`/carrito/${store.id}`)}`} style={{ fontWeight: 700, color: 'var(--verde)' }}>creá una (opcional)</Link>.
+          </p>
+        )}
       </aside>
     </form>
   )

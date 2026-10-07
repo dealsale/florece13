@@ -18,12 +18,26 @@ async function shrink(file: File, maxSide: number): Promise<Blob> {
   }
 }
 
-export async function uploadImage(file: File, tipo: 'producto' | 'logo' | 'portada'): Promise<string> {
-  const blob = await shrink(file, tipo === 'portada' ? 2200 : 1800)
+export async function uploadImage(file: File, tipo: 'producto' | 'logo' | 'portada' | 'historia'): Promise<string> {
+  return (await uploadMedia(file, tipo)).url
+}
+
+/** Foto (se reduce en el celular) o, solo para historias, video corto tal cual. */
+export async function uploadMedia(file: File, tipo: 'producto' | 'logo' | 'portada' | 'historia'): Promise<{ url: string; mediaType: 'image' | 'video' }> {
+  if (tipo === 'historia' && file.type.startsWith('video/')) {
+    if (file.size > 40 * 1024 * 1024) throw new Error('El video pesa más de 40 MB. Grabá uno más corto (15 a 30 segundos).')
+    const body = new FormData()
+    body.append('foto', file, file.name)
+    const res = await fetch('/api/subir?tipo=historia', { method: 'POST', body })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok || !data.url) throw new Error(data.error ?? 'No pudimos subir el video.')
+    return data
+  }
+  const blob = await shrink(file, tipo === 'portada' || tipo === 'historia' ? 2200 : 1800)
   const body = new FormData()
   body.append('foto', blob, blob === file ? file.name : 'foto.jpg')
   const res = await fetch(`/api/subir?tipo=${tipo}`, { method: 'POST', body })
   const data = await res.json().catch(() => ({}))
   if (!res.ok || !data.url) throw new Error(data.error ?? 'No pudimos subir la foto.')
-  return data.url
+  return { url: data.url, mediaType: 'image' }
 }

@@ -20,6 +20,8 @@ export async function Header() {
             <Link href="/admin" className="btn btn-sm btn-outline desk">Administración</Link>
           ) : store ? (
             <Link href="/panel" className="btn btn-sm btn-outline desk">Mi tienda</Link>
+          ) : user?.role === 'CUSTOMER' ? (
+            <Link href="/cuenta" className="btn btn-sm btn-outline desk">Mi cuenta</Link>
           ) : user ? (
             <Link href="/panel/crear-tienda" className="btn btn-sm btn-primary desk">Crear mi tienda</Link>
           ) : (

@@ -12,7 +12,7 @@ import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { INSTALL_EARLY_SCRIPT, InstallBanner, InstallProvider } from '@/components/InstallApp'
 import { TabBar } from '@/components/TabBar'
-import { getCurrentUser } from '@/lib/auth'
+import { getCurrentUser, getStoreForUser } from '@/lib/auth'
 import { splashStartupImages } from '@/lib/pwa'
 import { appUrl } from '@/lib/url'
 
@@ -65,6 +65,7 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser()
+  const account = !user ? 'none' : user.role === 'ADMIN' ? 'admin' : user.role === 'CUSTOMER' && !(await getStoreForUser(user.id)) ? 'customer' : 'merchant'
   return (
     <html lang="es-CO">
       <head>
@@ -77,7 +78,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <InstallBanner />
             <main>{children}</main>
             <Footer />
-            <TabBar loggedIn={Boolean(user)} />
+            <TabBar account={account} />
           </CartProvider>
         </InstallProvider>
       </body>

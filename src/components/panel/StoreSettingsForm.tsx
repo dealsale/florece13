@@ -4,6 +4,8 @@ import { useActionState } from 'react'
 import type { Store } from '@/db/schema'
 import { updateStore, type FormState } from '@/lib/actions/merchant'
 import { SingleImageField } from '../ImageUploader'
+import { LocationPicker } from '../map/LocationPicker'
+import { HoursEditor } from './HoursEditor'
 import { StoreBasicsFields } from './StoreBasicsFields'
 import { useSubmit } from '@/components/useSubmit'
 
@@ -44,7 +46,17 @@ export function StoreSettingsForm({
         </div>
       </div>
       <div className="card pad form">
+        <h2 className="h3">Ubicación y horario</h2>
+        <p className="hint" style={{ marginTop: -6 }}>Con esto aparecés en el mapa y en «Cerca de ti», con «Abierto» o «Cerrado».</p>
+        <LocationPicker initial={{ lat: store.lat, lng: store.lng }} />
+        <HoursEditor initial={store.hours} />
+      </div>
+      <div className="card pad form">
         <h2 className="h3">Entregas</h2>
+        <label className="check">
+          <input type="checkbox" name="delivers" defaultChecked={store.delivers} />
+          <span><strong>Hago domicilios en el barrio</strong><br /><span className="small muted">Aparece «Domicilio» en tu tienda y en el mapa.</span></span>
+        </label>
         <label className="check">
           <input type="checkbox" name="shipsNationwide" defaultChecked={store.shipsNationwide} />
           <span><strong>Hago envíos a todo el país</strong><br /><span className="small muted">El costo del envío lo acordás con cada comprador.</span></span>

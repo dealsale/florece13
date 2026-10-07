@@ -84,7 +84,7 @@ export function SingleImageField({
   hint,
 }: {
   name: string
-  tipo: 'logo' | 'portada'
+  tipo: 'logo' | 'portada' | 'producto'
   initial?: string | null
   label: string
   hint?: string
@@ -108,7 +108,7 @@ export function SingleImageField({
       <span className="flabel">{label}</span>
       <input type="hidden" name={name} value={url} />
       <div className="imgf">
-        <div className={`imgf__p ${tipo === 'portada' ? 'wide' : ''} ${busy ? 'shimmer' : ''}`}>
+        <div className={`imgf__p ${tipo !== 'logo' ? 'wide' : ''} ${busy ? 'shimmer' : ''}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {url ? <img src={url} alt="" /> : !busy && <Icon name="camara" size={28} />}
         </div>

@@ -7,7 +7,15 @@ La vitrina digital de los comercios de la Comuna 13 de Medellín. Cada tienda de
 ## Qué hace hoy
 
 **Compradores** (web app pensada para celular, instalable como app):
-- Inicio con buscador, categorías, tiendas y productos recién publicados.
+- **Inicio "Mi 13"**: un feed vivo con historias de 24 h, los 7 universos (Comprar · Comer · Servicios · Experiencias · Ofertas · Empleo · Eventos), "Hoy en la 13", "Cerca de ti" (con "Estoy en la 13": distancia, abierto/cerrado, domicilio, precio y oferta activa), Florece Flash, tus tiendas seguidas, lo más pedido, nuevos negocios, servicios disponibles e historias del barrio. Cada sección aparece solo si tiene algo real.
+- **Mapa vivo** (`/mapa`, Leaflet + OpenStreetMap) con filtros (tiendas, comida, barberías, belleza, arte, servicios, cafés, eventos, hospedajes, experiencias) y "Cómo llegar".
+- **Florece Flash** (`/ofertas`): ofertas de 1 h, 3 h o hasta la noche, con cuenta regresiva y distancia. "Avisarme de ofertas cerca" manda push a quien esté en el radio (sin cuenta).
+- **Seguir negocios** (por dispositivo, sin cuenta): push cuando la tienda publica productos, ofertas, eventos o historias.
+- **Agenda 13** (`/eventos`): música, arte, deportes, baile, talleres, gastronomía y ferias, con filtros Hoy / Mañana / Fin de semana.
+- **Oportunidades** (`/empleo`): vacantes de los negocios y "Busco trabajo" (perfiles visibles solo para negocios registrados y admin; se borran a los 60 días).
+- **Servicios y talento** (`/u/servicios`): "¿Qué necesitás? Fotógrafo · N disponibles".
+- **Tu compra floreció aquí** (`/impacto`): métricas reales de pedidos no cancelados: personales (lo que compraste, negocios, emprendimientos, sectores) y del mes en toda la plataforma.
+- **Cuenta de cliente opcional** (`/registro?tipo=cliente` → `/cuenta`): pedidos (incluye los hechos antes de registrarse en ese celular), datos que se autocompletan en el checkout, tiendas seguidas e impacto. Comprar nunca exige cuenta.
 - Búsqueda por texto y categoría, listado de tiendas.
 - Perfil de tienda: portada, logo, historia, sector de la 13, catálogo, WhatsApp e Instagram.
 - Ficha de producto: galería, precio (con precio anterior tachado), opciones (p. ej. Color × Talla) que cambian precio y foto, "Pedir por WhatsApp" y "Agregar al carrito".
@@ -21,7 +29,8 @@ La vitrina digital de los comercios de la Comuna 13 de Medellín. Cada tienda de
 - Resumen: pedidos nuevos, pedidos y ventas del mes, lista de pasos para completar la tienda.
 - Catálogo: productos y servicios. Crear, editar, borrar, marcar como agotado. Hasta 6 fotos, ordenables. Hasta 3 categorías. Opciones (hasta 2 grupos, 60 combinaciones) con foto por valor y precio/disponibilidad por combinación; al editar, las combinaciones conservan su id para no romper carritos. Las fotos se reducen en el celular antes de subirlas (ahorra datos) y el servidor las normaliza a WebP.
 - Pedidos: lista con filtros por estado, detalle, cambio de estado (el comprador lo ve en su link) y mensaje de WhatsApp prearmado para el cliente.
-- Mi tienda: logo, portada, historia, dirección, forma de entrega (envío nacional y/o recoger).
+- Mi tienda: logo, portada, historia, dirección, ubicación en el mapa, horario semanal y forma de entrega (envío nacional, domicilio en el barrio y/o recoger).
+- Publicar hoy (`/panel/hoy`): historias (foto o video hasta 40 MB, 24 h), ofertas Flash, eventos para la Agenda 13 y vacantes (30 días).
 - QR y sticker "Florece aquí" para imprimir o descargar.
 
 **Notificaciones** (`/panel/avisos`):
@@ -97,15 +106,17 @@ Para un dominio propio: **Settings → Networking → Custom Domain** y actualiz
 
 ## Tiendas de prueba
 
-Para verificar la plataforma de punta a punta hay 3 tiendas de prueba, ya aprobadas, con 4 productos y 6 pedidos cada una (en distintos estados):
+Para verificar la plataforma de punta a punta hay 5 tiendas de prueba, ya aprobadas, con productos, pedidos, ubicación, horario, ofertas Flash, eventos, una vacante e historias (las ofertas e historias vencidas se recrean en cada despliegue):
 
 | Tienda | Categoría | Usuario |
 | --- | --- | --- |
 | Ladera Streetwear | Ropa y streetwear | `moda@demo.florece13.test` |
 | Tejidos Doña Amparo | Accesorios | `accesorios@demo.florece13.test` |
 | Recuerdos del Salado | Souvenirs | `recuerdos@demo.florece13.test` |
+| Arepas Doña Gloria | Comida | `comida@demo.florece13.test` |
+| Barbería El Parce | Barberías (servicios) | `barberia@demo.florece13.test` |
 
-Clave de las tres: `Florece13-prueba` (o la que pongas en `SEED_DEMO_PASSWORD`).
+Clave de todas: `Florece13-prueba` (o la que pongas en `SEED_DEMO_PASSWORD`).
 
 - **Crearlas:** variable `SEED_DEMO=true` y redesplegar (o `SEED_DEMO=true npm run db:demo`).
 - **Borrarlas antes del lanzamiento:** `SEED_DEMO=remove` y redesplegar. Borra las cuentas `@demo.florece13.test` con sus tiendas, productos y pedidos.
@@ -158,4 +169,5 @@ Para cambiar el esquema: editá `src/db/schema.ts`, corré `npm run db:generate`
 - Pago dentro de la app (pasarela por definir) usando los campos ya previstos.
 - Recuperación de clave por correo. Hoy el admin genera una clave temporal desde `/admin` ("Nueva clave") y se la pasa al comerciante.
 - Notificación al comerciante por correo/WhatsApp Business API cuando entra un pedido (hoy le llega porque el comprador le escribe).
-- Sección de historias del barrio, plantillas de redes y logo en arte final (vertical, monocromo).
+- Calificaciones y reseñas reales de compradores (hoy no se muestran estrellas para no inventarlas).
+- Plantillas de redes y logo en arte final (vertical, monocromo).

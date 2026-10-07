@@ -5,7 +5,8 @@ import { notifyNewOrder, safeNotify } from '@/lib/notify'
 import { randomInt } from 'node:crypto'
 import { and, count, eq, gt, inArray } from 'drizzle-orm'
 import { z } from 'zod'
-import { db, orderItems, orders, products, productVariants, stores } from '@/db'
+import { db, orderItems, orders, products, productVariants, stores, users } from '@/db'
+import { getCurrentUser } from '@/lib/auth'
 import { normalizePhone } from '@/lib/format'
 import { getProductsForCart } from '@/lib/queries'
 import { variantLabel } from '@/lib/variants'
@@ -108,7 +109,7 @@ export async function createOrder(_prev: OrderState, formData: FormData): Promis
 
   const [store] = await db.select().from(stores).where(eq(stores.id, data.storeId)).limit(1)
   if (!store || store.status !== 'ACTIVE') return { ok: false, message: 'Esta tienda no está recibiendo pedidos.' }
-  if (data.deliveryMethod === 'ENVIO' && !store.shipsNationwide)
+  if (data.deliveryMethod === 'ENVIO' && !store.shipsNationwide && !store.delivers)
     return { ok: false, message: 'Esta tienda solo entrega para recoger en el local.' }
   if (data.deliveryMethod === 'RECOGER' && !store.allowsPickup)
     return { ok: false, message: 'Esta tienda solo hace envíos.' }
@@ -146,6 +147,14 @@ export async function createOrder(_prev: OrderState, formData: FormData): Promis
   if (resolved.some((l) => l === null)) return { ok: false, message: 'Algunos productos o tallas ya no están disponibles. Revisá tu carrito.' }
   const lines = resolved as NonNullable<(typeof resolved)[number]>[]
 
+  // Con cuenta (opcional): el pedido queda en su panel y se guardan sus datos para la próxima.
+  const user = await getCurrentUser()
+  if (user && (!user.phone || !user.address))
+    await db
+      .update(users)
+      .set({ phone: user.phone || data.customerPhone, city: user.city || data.city, address: user.address || data.address })
+      .where(eq(users.id, user.id))
+
   const subtotal = lines.reduce((sum, l) => sum + l.unitPrice * l.quantity, 0)
 
   for (let attempt = 0; attempt < 5; attempt++) {
@@ -156,6 +165,7 @@ export async function createOrder(_prev: OrderState, formData: FormData): Promis
           .values({
             code: newCode(),
             storeId: store.id,
+            customerUserId: user?.id ?? null,
             customerName: data.customerName,
             customerPhone: data.customerPhone,
             customerEmail: data.customerEmail,

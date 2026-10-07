@@ -36,14 +36,16 @@ export async function register(_prev: AuthState, formData: FormData): Promise<Au
   if (await findUserByEmail(email)) {
     return { errors: { email: ['Ya hay una cuenta con ese correo. Entrá con tu clave.'] }, values }
   }
+  // "cliente": cuenta de comprador (opcional); si no, cuenta para abrir una tienda.
+  const customer = formData.get('tipo') === 'cliente'
   const [user] = await db
     .insert(users)
-    .values({ name, email, passwordHash: await hashPassword(password), role: isAdminEmail(email) ? 'ADMIN' : 'MERCHANT' })
+    .values({ name, email, passwordHash: await hashPassword(password), role: isAdminEmail(email) ? 'ADMIN' : customer ? 'CUSTOMER' : 'MERCHANT' })
     .returning()
   await createSession(user.id)
   // La sesión cambió: descartar las páginas que el navegador tenga guardadas.
   revalidatePath('/', 'layout')
-  redirect(user.role === 'ADMIN' ? '/admin' : '/panel/crear-tienda')
+  redirect(user.role === 'ADMIN' ? '/admin' : customer ? safeNext(formData.get('next'), '/cuenta?bienvenida=1') : '/panel/crear-tienda')
 }
 
 export async function login(_prev: AuthState, formData: FormData): Promise<AuthState> {
@@ -60,7 +62,7 @@ export async function login(_prev: AuthState, formData: FormData): Promise<AuthS
   await createSession(user.id)
   // La sesión cambió: descartar las páginas que el navegador tenga guardadas.
   revalidatePath('/', 'layout')
-  redirect(safeNext(formData.get('next'), user.role === 'ADMIN' || isAdminEmail(user.email) ? '/admin' : '/panel'))
+  redirect(safeNext(formData.get('next'), user.role === 'ADMIN' || isAdminEmail(user.email) ? '/admin' : user.role === 'CUSTOMER' ? '/cuenta' : '/panel'))
 }
 
 export async function logout() {

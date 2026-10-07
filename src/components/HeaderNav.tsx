@@ -6,9 +6,11 @@ import { usePathname } from 'next/navigation'
 export function HeaderNav({ admin }: { admin: boolean }) {
   const path = usePathname()
   const links = [
-    ['/buscar', 'Productos'],
-    ['/tiendas', 'Tiendas'],
-    ['/vende', 'Vendé'],
+    ['/mapa', 'Mapa'],
+    ['/ofertas', 'Ofertas'],
+    ['/eventos', 'Agenda'],
+    ['/empleo', 'Empleo'],
+    ['/tiendas', 'Negocios'],
     ...(admin ? [['/admin', 'Administración']] : []),
   ]
   return (

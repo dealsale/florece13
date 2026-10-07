@@ -5,18 +5,23 @@ import { usePathname } from 'next/navigation'
 import { CartCount } from './cart'
 import { Icon } from './Icon'
 
-export function TabBar({ loggedIn }: { loggedIn: boolean }) {
+/** Barra de abajo (celular): Mi 13 · Mapa · Explorar · Carrito · Cuenta. */
+export function TabBar({ account }: { account: 'none' | 'customer' | 'merchant' | 'admin' }) {
   const path = usePathname()
+  const me =
+    account === 'merchant'
+      ? { href: '/panel', label: 'Mi tienda', icon: 'tienda' }
+      : account === 'admin'
+        ? { href: '/admin', label: 'Admin', icon: 'escudo' }
+        : account === 'customer'
+          ? { href: '/cuenta', label: 'Mi cuenta', icon: 'usuario' }
+          : { href: '/entrar', label: 'Entrar', icon: 'usuario' }
   const tabs = [
-    { href: '/', label: 'Inicio', icon: 'inicio', active: path === '/' },
-    { href: '/buscar', label: 'Explorar', icon: 'buscar', active: ['/buscar', '/tiendas', '/t/', '/p/'].some((p) => path.startsWith(p)) },
+    { href: '/', label: 'Mi 13', icon: 'inicio', active: path === '/' },
+    { href: '/mapa', label: 'Mapa', icon: 'mapa', active: path.startsWith('/mapa') },
+    { href: '/buscar', label: 'Explorar', icon: 'buscar', active: ['/buscar', '/tiendas', '/t/', '/p/', '/u/', '/ofertas', '/eventos', '/empleo'].some((p) => path.startsWith(p)) },
     { href: '/carrito', label: 'Carrito', icon: 'carrito', active: path.startsWith('/carrito') || path.startsWith('/pedido') },
-    {
-      href: loggedIn ? '/panel' : '/vende',
-      label: loggedIn ? 'Mi tienda' : 'Vender',
-      icon: 'tienda',
-      active: ['/panel', '/vende', '/admin', '/entrar', '/registro'].some((p) => path.startsWith(p)),
-    },
+    { ...me, active: ['/panel', '/vende', '/admin', '/entrar', '/registro', '/cuenta'].some((p) => path.startsWith(p)) },
   ]
   return (
     <nav className="tabs" aria-label="Navegación">

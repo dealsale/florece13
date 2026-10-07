@@ -4,12 +4,14 @@ import { useActionState } from 'react'
 import { register, type AuthState } from '@/lib/actions/auth'
 import { useSubmit } from '@/components/useSubmit'
 
-export function RegisterForm() {
+export function RegisterForm({ tipo, next }: { tipo: 'cliente' | 'tienda'; next?: string }) {
   const [state, action, pending] = useActionState<AuthState, FormData>(register, null)
   const onSubmit = useSubmit(action)
   const err = (k: string) => state?.errors?.[k]?.[0]
   return (
     <form onSubmit={onSubmit} className="card pad form rise" style={{ ['--i' as string]: 1 }} noValidate>
+      <input type="hidden" name="tipo" value={tipo} />
+      {next && <input type="hidden" name="next" value={next} />}
       <div className="field">
         <label htmlFor="name">Tu nombre</label>
         <input id="name" name="name" className="input" autoComplete="name" required defaultValue={state?.values?.name} aria-invalid={Boolean(err('name'))} />

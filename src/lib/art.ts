@@ -25,31 +25,19 @@ function rng(seed: string) {
   }
 }
 
+/** Color de cada categoría: el de su universo, con variaciones para que el inicio no se vea plano. */
 export const CATEGORY_COLORS: Record<string, string> = {
-  artesanias: '#E5379B',
-  ropa: '#17BEBB',
-  accesorios: '#FF8A00',
-  bolsos: '#9C4A2F',
-  calzado: '#17BEBB',
-  joyeria: '#E5379B',
-  arte: '#2ECC71',
-  souvenirs: '#9C4A2F',
-  decoracion: '#FF8A00',
-  comida: '#FF8A00',
-  cafe: '#9C4A2F',
-  dulces: '#E5379B',
-  belleza: '#E5379B',
-  musica: '#6B5BD2',
-  libros: '#6B5BD2',
-  ninos: '#FF8A00',
-  mascotas: '#2ECC71',
-  plantas: '#2ECC71',
-  experiencias: '#17BEBB',
-  fotografia: '#E5379B',
-  talleres: '#6B5BD2',
-  eventos: '#FF8A00',
-  diseno: '#17BEBB',
+  ropa: '#17BEBB', calzado: '#17BEBB', accesorios: '#FF8A00', bolsos: '#9C4A2F', joyeria: '#E5379B', artesanias: '#E5379B',
+  arte: '#2ECC71', souvenirs: '#9C4A2F', regalos: '#E5379B', tecnologia: '#6B5BD2', mercados: '#2ECC71', ferreterias: '#9C4A2F',
+  libros: '#6B5BD2', decoracion: '#FF8A00', cosmeticos: '#E5379B', ninos: '#FF8A00', mascotas: '#2ECC71', plantas: '#2ECC71',
+  emprendimientos: '#17BEBB',
+  restaurantes: '#FF8A00', 'comidas-rapidas': '#FF8A00', comida: '#FF8A00', panaderias: '#9C4A2F', cafe: '#9C4A2F', dulces: '#E5379B',
+  bebidas: '#2ECC71', bares: '#6B5BD2',
+  barberias: '#6B5BD2', belleza: '#E5379B', unas: '#E5379B', tatuajes: '#6B5BD2', fotografia: '#E5379B', diseno: '#17BEBB',
+  programacion: '#6B5BD2', tecnicos: '#9C4A2F', electricistas: '#FF8A00', mecanicos: '#9C4A2F', clases: '#6B5BD2', eventos: '#2ECC71',
+  limpieza: '#17BEBB', dj: '#6B5BD2', domicilios: '#FF8A00',
   servicios: '#6B5BD2',
+  experiencias: '#17BEBB', grafiti: '#2ECC71', baile: '#E5379B', musica: '#6B5BD2', talleres: '#FF8A00', hospedajes: '#17BEBB',
 }
 const TINT: Record<string, string> = { '#E5379B': '#FCE4F1', '#17BEBB': '#D6F4F3', '#FF8A00': '#FFEBD2', '#2ECC71': '#DDF6E7', '#9C4A2F': '#F3E0D8', '#6B5BD2': '#E7E4F6' }
 const CATEGORY_TINTS: Record<string, string> = Object.fromEntries(Object.entries(CATEGORY_COLORS).map(([k, c]) => [k, TINT[c]]))
